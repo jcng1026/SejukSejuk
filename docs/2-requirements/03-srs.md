@@ -50,7 +50,7 @@ Status: Draft for approval · Priority: **M** Must, **S** Should, **C** Could (s
 ### 2.3 Technician jobs (Module 2)
 | ID | P | Requirement | Acceptance criteria |
 |---|---|---|---|
-| FR-TEC-1 | M | Technician sees Today / Upcoming / History of own jobs only. | Another technician's job is not retrievable (RLS). |
+| FR-TEC-1 | M | Technician sees Today (today's jobs plus any still-open job from an earlier day) / Upcoming (assigned, after today) / History (30 most recent completed) of own jobs only. | Another technician's job is not retrievable (RLS). |
 | FR-TEC-2 | M | "Start job" moves Assigned → In Progress. | Only the assigned technician (or admin override). |
 | FR-TEC-3 | M | Completion form: order ID (read-only), work done, extra charges (≥ 0), final amount (auto = quoted + extras), remarks, up to 6 attachments, technician name and timestamp (server-set, not editable). | Tampered technician/timestamp values are ignored by the server. |
 | FR-TEC-4 | M | Attachments: image/video/PDF, ≤ 6; image/PDF ≤ 10 MB, video ≤ 50 MB; photos compressed in browser; private bucket, signed URLs. | 7th file and oversize files rejected with a clear message. |

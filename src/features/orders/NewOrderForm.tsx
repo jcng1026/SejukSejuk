@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import { createOrderAction, dayLoadAction, type FormState } from "./actions";
+import type { FormState } from "@/lib/result";
+
+import { createOrderAction, dayLoadAction } from "./actions";
 import { errorProps, FormField, SELECT_CLASS } from "./FormField";
 import type { ServiceType, Technician, TechnicianJobSlot } from "./queries";
 import { mytDateTimeToIso, TIME_SLOTS } from "./schedule";

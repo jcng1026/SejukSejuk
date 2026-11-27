@@ -26,3 +26,6 @@ export type Result<T> = { ok: true; data: T } | Failure;
 export function fail(code: ErrorCode, message: string, field?: string): Failure {
   return { ok: false, error: field ? { code, message, field } : { code, message } };
 }
+
+/** State returned to a form by its Server Action (null before the first submit). */
+export type FormState = Failure | { ok: true; data: { message: string } } | null;

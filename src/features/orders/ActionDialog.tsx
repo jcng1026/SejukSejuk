@@ -13,7 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import type { FormState } from "./actions";
+import type { FormState } from "@/lib/result";
 
 type Action = (previous: FormState, formData: FormData) => Promise<FormState>;
 

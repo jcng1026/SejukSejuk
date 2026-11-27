@@ -191,7 +191,7 @@ Approved visual reference: [mockup-v3.html](mockup-v3.html) (contains rejected v
 |---|---|
 | Login | Option A layout: split hero (grain gradient, word-fade heading) + sign-in form with six demo buttons |
 | Admin/Manager home | **C2 schedule bento**: top bar with pill nav + search + New order; KPI tiles; flags-by-severity bar; technician × hour schedule with "now" line and unassigned lane; review queue tile |
-| Technician | **E layout**: map-first next-job card, day-progress ring, later jobs scroller, pinned primary action, bottom tabs (Today / Upcoming / History) |
+| Technician | **E layout**: next-job card with one-tap Navigate (Google Maps link) and Call — a link instead of an embedded map preview, to avoid a maps API key and extra data on mobile; day-progress ring; later jobs as a vertical list; pinned primary action; bottom tabs (Today / Upcoming / History) |
 | AI | Round sparkle button fixed bottom-right on every screen; slide-up panel |
 | Palette (C) | bg `#F6F1EA`, surface `#FFFDF9`, ink `#1F2A2A`, muted `#5E6B66`, line `#E7DED2`, accent teal `#0F766E` |
 | Flags | High `#DC2626` 🔴, Medium `#EA580C` 🟠, Low `#CA8A04` 🟡 (dots/bars; Low *text* on its pale chip uses `#A16207` for WCAG AA contrast), Resolved `#15803D` ✓ |
