@@ -53,17 +53,18 @@ type ErrorCode =
 Each function below is an **RPC API endpoint**: Supabase exposes it over HTTP at `POST /rest/v1/rpc/<function_name>` (e.g. `/rest/v1/rpc/start_job`). Our screens reach them through Server Actions, but **any signed-in user could call them directly**, so every function enforces role, ownership and current status itself and never trusts the UI.
 
 All take the caller from `auth.uid()`; none accept an actor id. Money in sen. Times `timestamptz`.
+Argument names are `p_`-prefixed in SQL (`id` → `p_order_id`, `reason` → `p_reason`, …) so they never collide with column names; the table shows them unprefixed for readability. Error codes come back as the message prefix, e.g. `VALIDATION: Reason is required`.
 
 | Function | Caller | Args | Effect / returns |
 |---|---|---|---|
 | `create_order` | admin | customer_name, customer_phone, customer_address, problem_description, service_type_id, quoted_sen, scheduled_at, technician_id?, admin_notes? | Inserts order (New or Assigned), returns `{id, order_no, status}` |
 | `update_order` | admin | id, patch (whitelisted fields), reason? | Allowed while New/Assigned; else requires `reason` (override) |
-| `assign_order` | admin | id, technician_id, reason? | New→Assigned, or reassign (reason required) |
+| `assign_order` | admin | id, technician_id, reason? | New→Assigned; reassign while Assigned, or override while In Progress (reason required for both) |
 | `reschedule_order` | admin | id, scheduled_at, reason | Updates time, `reschedule_count += 1` |
 | `start_job` | tech (assigned) / admin + reason | id, reason? | Assigned→In Progress, `started_at = now()` |
-| `complete_job` | tech (assigned) / admin + reason | id, work_done, extra_sen, remarks?, attachment_ids[], payment?{amount_sen, method, receipt_path?}, reason? | Writes completion (+payment), In Progress→Job Done; triggers flags, WhatsApp, notifications |
+| `complete_job` | tech (assigned) / admin + reason | id, work_done, extra_sen, remarks?, payment_amount_sen?, payment_method?, payment_receipt_path?, reason? | Writes completion and one payment per job (upsert), In Progress→Job Done; Phase 3 adds flags, WhatsApp, notifications. Attachments are registered separately (`register_attachment`, Phase 2) |
 | `review_order` | manager | id, decision `approve`\|`send_back`, reason? | Job Done→Reviewed, or →In Progress (reason required) |
-| `close_order` | manager | id | Reviewed→Closed (requires payment ≥ final or explicit note) |
+| `close_order` | manager | id, note? | Reviewed→Closed; note required when payment < final |
 | `raise_flag` | admin, manager | order_id, severity, message | Manual flag |
 | `resolve_flag` | admin, manager | flag_id, note | Open→Resolved |
 | `mark_whatsapp_sent` | tech (own), admin | message_id | Sets `sent_at`, `sent_by` |

@@ -55,6 +55,19 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+@theme {
+  --animate-word-fade: word-fade 0.7s ease both;
+
+  @keyframes word-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
 /* Palette C (docs/3-design/04-design.md §8). Light mode only. */
 :root {
   --background: #f6f1ea;
@@ -101,6 +114,17 @@
   --status-job-done: #7c3aed;
   --status-reviewed: #15803d;
   --status-closed: #5e6b66;
+}
+
+@layer components {
+  /* Login hero: warm sand-to-teal gradient with a fine grain (mockup option A in palette C). */
+  .login-hero {
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E"),
+      radial-gradient(at 15% 20%, #f1e2cf 0, transparent 55%),
+      radial-gradient(at 85% 30%, #cfeae2 0, transparent 50%),
+      radial-gradient(at 50% 100%, #e9d8c2 0, transparent 55%), #f3ebdf;
+  }
 }
 
 @layer base {
