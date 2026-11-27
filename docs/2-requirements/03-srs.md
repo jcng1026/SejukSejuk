@@ -38,11 +38,11 @@ Status: Draft for approval · Priority: **M** Must, **S** Should, **C** Could (s
 | FR-ORD-3 | M | Phone validated as Malaysian and stored as `60XXXXXXXXX`. | `012-345 6789` stored as `60123456789`; invalid rejected. |
 | FR-ORD-4 | M | Status = Assigned if technician chosen, else New. | |
 | FR-ORD-5 | M | Post-submit summary shows the created order. | |
-| FR-ORD-6 | S | Technician picker shows each technician's job count that day and warns of clashes within ±2 h. | Warning shown, assignment still allowed. |
+| FR-ORD-6 | S | Technician picker shows each technician's job count that day and warns of clashes: another job starting less than 2 h before or after (exactly 2 h apart is not a clash). Also shown in the Reassign dialog. | Warning shown, assignment still allowed. |
 | FR-ORD-7 | S | Admin summary offers "Notify technician on WhatsApp" deep link. | Opens `wa.me` with prefilled job details. |
-| FR-ORD-8 | M | Admin may edit order fields while New/Assigned; afterwards only via override with reason. | Edit after In Progress without override is rejected by the server. |
+| FR-ORD-8 | M | Admin may edit order fields while New/Assigned; while In Progress only via override with reason; from Job Done onwards fields are locked (the final amount is already computed from the quote). | Edit while In Progress without a reason, or after Job Done, is rejected by the server. |
 | FR-ORD-9 | M | Admin may reassign while New/Assigned (reason required once assigned); while In Progress only as an override with a reason. | Reason stored in audit log; previous technician loses access. |
-| FR-ORD-10 | M | Admin may reschedule (`scheduled_at`), reason required; counted against the assigned technician. | KPI reschedule count increments. |
+| FR-ORD-10 | M | Admin may reschedule (`scheduled_at`) while New/Assigned, reason required; counted against the assigned technician. Once started, the job is not rescheduled. | KPI reschedule count increments. |
 | FR-ORD-11 | M | Order list: search (order no, name, phone), filters (status, technician, date range, has open flags), 25 per page, includes Closed. | |
 | FR-ORD-12 | M | Order detail shows fields, attachments, payment, flags, audit timeline. | |
 | FR-ORD-13 | S | Service types come from a lookup table. | |

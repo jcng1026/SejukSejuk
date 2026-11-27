@@ -24,10 +24,10 @@ Estimates are focused working hours (≈ 40 h of the 64 h window; the rest is bu
 | 1.6 | Seed script: users (2 admins, 1 manager, 4 active techs + 1 deactivated to demo FR-AUTH-3), service types, ~6 weeks of orders in every status incl. flags and reschedules, backdated audit timelines; demo reset via `supabase db reset` (deployment guide) | 1 h |
 | 1.7 | Login page (A layout) + demo buttons + role-based redirect + deactivated check | 0.5 h |
 
-## Phase 2 — Core workflow UI (≈ 9 h) · branch `feat/core-workflow`
+## Phase 2 — Core workflow UI (≈ 9 h) · two PRs: 2a staff side (2.1–2.4, `feat/staff-orders`), 2b technician side (2.5–2.6)
 | # | Task | Est |
 |---|---|---|
-| 2.1 | App shell: top bar + pill nav (desktop), bottom tabs (mobile), AI button placeholder | 1 h |
+| 2.1 | App shell: top bar + pill nav + search (desktop); bottom tabs ship with the technician screens (2b). The AI button lands with the assistant in 5.6, not as an inert placeholder | 1 h |
 | 2.2 | Admin order form (Zod schema shared), phone normalisation 🧪, technician picker with day load/clash warning, post-submit summary + "notify technician" link | 2 h |
 | 2.3 | Order list (search, filters, pagination via URL state) + order detail (fields, attachments, flags, payment, audit timeline) | 2 h |
 | 2.4 | Edit / reassign / reschedule / override dialogs with reasons | 1 h |
@@ -51,6 +51,7 @@ Estimates are focused working hours (≈ 40 h of the 64 h window; the rest is bu
 | 4.3 | Dashboard page: cards, leaderboard, Recharts charts, period switcher | 1.5 h |
 | 4.4 | Calendar (FullCalendar week/month, technician filter) | 0.5 h |
 | 4.5 | Technicians page: deactivate/reactivate | 0.5 h |
+| 4.6 | Audit log page with filters (FR-AUD-2); per-order timelines already exist since 2.3 | 0.5 h |
 
 ## Phase 5 — AI assistant (≈ 6 h) · branch `feat/ai-assistant`
 | # | Task | Est |

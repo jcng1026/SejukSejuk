@@ -16,6 +16,8 @@ export interface ActionError {
   code: ErrorCode;
   message: string;
   field?: string;
+  /** Per-field messages for forms (VALIDATION only). */
+  fields?: Record<string, string>;
 }
 
 export type Failure = { ok: false; error: ActionError };
