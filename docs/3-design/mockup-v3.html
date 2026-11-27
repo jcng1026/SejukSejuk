@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sejuk Sejuk — throwaway mockup v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800&display=swap" rel="stylesheet">
+<style>
+:root{
+ --bg:#F6F1EA;--surface:#FFFDF9;--ink:#1F2A2A;--muted:#5E6B66;--line:#E7DED2;--accent:#0F766E;--accent-ink:#fff;--accent-soft:#DDF1EC;--sand:#EFE4D4;
+ --body:"Plus Jakarta Sans",system-ui;--head:"Cabinet Grotesk",system-ui;--mono:"JetBrains Mono",ui-monospace,monospace;--r:18px;
+ --high:#DC2626;--high-soft:#FEE2E2;--med:#EA580C;--med-soft:#FFEDD5;--low:#A16207;--low-soft:#FEF9C3;--ok:#15803D;--ok-soft:#DCFCE7;
+ --s-new:#94A3B8;--s-asg:#0EA5E9;--s-prog:#0F766E;--s-done:#7C3AED;--s-rev:#15803D}
+*{box-sizing:border-box}
+body{margin:0;background:#E4E1DB;font-family:var(--body);color:var(--ink);font-variant-numeric:tabular-nums}
+.picker{position:sticky;top:0;z-index:50;background:#111;color:#eee;display:flex;gap:8px;align-items:center;padding:10px 16px;font:14px system-ui;flex-wrap:wrap}
+.picker button{font:inherit;background:#222;color:#eee;border:1px solid #444;border-radius:6px;padding:6px 12px;cursor:pointer}
+.picker button[aria-pressed=true]{background:#fff;color:#111}
+.picker small{color:#aaa;margin-left:auto}
+.wrap{max-width:1280px;margin:0 auto;padding:24px 16px 64px;display:grid;gap:32px}
+.label{font:600 12px system-ui;letter-spacing:.06em;text-transform:uppercase;color:#555;margin:0 0 8px}
+.notes{background:#fff;border-radius:10px;padding:12px 16px;font:14px/1.6 system-ui;color:#333;border:1px solid #cfd3d8;margin-bottom:10px}
+.frame{position:relative;background:var(--bg);border-radius:16px;overflow:hidden;border:1px solid #cfc8bd}
+.variant[hidden]{display:none}
+h1,h2,h3,.head{font-family:var(--head);font-weight:800;margin:0}
+.mono{font-family:var(--mono);font-size:.9em}
+.small{font-size:13px;color:var(--muted)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.btn{font:600 14px var(--body);border-radius:999px;padding:10px 18px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.sm{padding:6px 12px;font-size:12px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.dot{width:9px;height:9px;border-radius:50%;background:currentColor;display:inline-block;flex:none}
+.f-high{background:var(--high-soft);color:var(--high)}.f-med{background:var(--med-soft);color:var(--med)}.f-low{background:var(--low-soft);color:var(--low)}.f-ok{background:var(--ok-soft);color:var(--ok)}
+.c-high{color:var(--high)}.c-med{color:var(--med)}.c-low{color:#CA8A04}.c-ok{color:var(--ok)}
+.st{background:var(--accent-soft);color:var(--accent)}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;min-width:0}
+.tile.dark{background:var(--ink);color:#F6F1EA;border-color:var(--ink)}.tile.dark .small{color:#B7C2BE}
+.tile.teal{background:var(--accent);color:#fff;border-color:var(--accent)}.tile.teal .small{color:#CDEDE7}
+.tile h3{font-size:19px}
+.big{font:800 54px var(--head);line-height:1}
+input{font:15px var(--body);padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);width:100%}
+.brand{font:700 15px var(--body);display:flex;gap:8px;align-items:center}
+.brand i{width:24px;height:24px;border-radius:8px;background:var(--accent);display:inline-block}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12px;background:var(--accent-soft);color:var(--accent);flex:none}
+.bar{height:8px;border-radius:4px;background:var(--sand);overflow:hidden;flex:1}.bar b{display:block;height:100%;background:var(--accent);border-radius:4px}
+.qi{display:grid;grid-template-columns:14px 1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.qi:last-of-type{border-bottom:0}
+.stack{display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;background:var(--c)}
+/* fab + ai panel */
+.fab{position:absolute;right:24px;bottom:24px;width:58px;height:58px;border-radius:50%;border:0;background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 24px rgba(31,42,42,.3);z-index:10;transition:transform .15s}
+.fab:hover{transform:scale(1.06)}.fab svg{width:26px;height:26px}
+.phone .fab{width:50px;height:50px;right:14px;bottom:150px}
+.ai{position:absolute;right:24px;bottom:94px;width:330px;background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 16px 44px rgba(31,42,42,.2);z-index:11;padding:14px;display:grid;gap:10px;font-size:14px}
+.ai[hidden]{display:none}.phone .ai{left:10px;right:10px;width:auto;bottom:208px}
+.ai .q{justify-self:end;background:var(--accent);color:#fff;padding:8px 12px;border-radius:16px 16px 4px 16px;max-width:85%}
+.ai .a{background:var(--bg);padding:10px 12px;border-radius:16px 16px 16px 4px}
+.ai .src{font-size:12px;color:var(--muted);margin-top:4px}
+/* login (A layout) */
+.login{display:grid;grid-template-columns:1.2fr 1fr;min-height:480px}
+.hero{padding:48px;display:flex;flex-direction:column;justify-content:space-between;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E"),radial-gradient(at 15% 20%,#F1E2CF 0,transparent 55%),radial-gradient(at 85% 30%,#CFEAE2 0,transparent 50%),radial-gradient(at 50% 100%,#E9D8C2 0,transparent 55%),#F3EBDF}
+.hero h1{font-size:58px;line-height:1;max-width:12ch}
+.w{display:inline-block;opacity:0;animation:fade .7s ease forwards}@keyframes fade{to{opacity:1}}
+.lform{background:var(--surface);padding:48px;display:flex;flex-direction:column;justify-content:center;gap:14px}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.quick .btn{font-size:13px;padding:9px 6px}
+/* desktop shell */
+.desk{min-height:700px}
+/* V1 sidebar bento */
+.v1{display:grid;grid-template-columns:230px 1fr}
+.v1 nav{background:var(--ink);color:#E9E2D6;padding:22px 14px;display:flex;flex-direction:column;gap:4px}
+.v1 nav a{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:999px;color:#B7C2BE;text-decoration:none;font-size:14px;font-weight:600}
+.v1 nav a.on{background:var(--accent);color:#fff}
+.v1 nav a span{font-size:12px;background:#ffffff1a;padding:1px 8px;border-radius:999px}
+.v1 main{padding:26px 28px;display:grid;gap:18px;align-content:start}
+.v1 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(150px,auto);gap:14px}
+.weekbars{display:flex;align-items:flex-end;gap:10px;height:80px;margin-top:auto}
+.weekbars div{flex:1;background:var(--accent-soft);border-radius:8px 8px 4px 4px;position:relative}
+.weekbars div.t{background:var(--accent)}
+.weekbars div span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:11px;color:var(--muted)}
+/* V2 top bar + schedule */
+.v2 header{display:flex;align-items:center;gap:18px;padding:16px 26px;border-bottom:1px solid var(--line);background:var(--surface)}
+.pills{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:999px}
+.pills span{padding:8px 14px;border-radius:999px;font-size:13px;font-weight:600;color:var(--muted)}
+.pills span.on{background:var(--ink);color:#fff}
+.v2 main{padding:22px 26px;display:grid;gap:14px}
+.v2 .grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+.k{grid-column:span 1;padding:14px 16px}.k .n{font:800 34px var(--head);margin-top:6px}
+.gantt{display:grid;grid-template-columns:70px 1fr;row-gap:10px;margin-top:8px;font-size:13px}
+.hours{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;grid-column:2;padding:0 2px}
+.lane{position:relative;height:38px;background:var(--bg);border-radius:10px}
+.blk{position:absolute;top:4px;bottom:4px;border-radius:8px;padding:4px 8px;font-size:11px;font-weight:600;color:#fff;overflow:hidden;white-space:nowrap}
+.now{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--high)}
+/* V3 hero + activity rail */
+.v3{display:grid;grid-template-columns:76px 1fr 300px}
+.v3 .rail{background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 0}
+.v3 .rail span{width:46px;height:46px;border-radius:16px;display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--muted)}
+.v3 .rail span.on{background:var(--ink);color:#fff}
+.v3 main{padding:26px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(140px,auto);gap:14px;align-content:start}
+.v3 aside{border-left:1px solid var(--line);background:var(--surface);padding:22px 18px;display:grid;gap:4px;align-content:start}
+.feed{display:grid;grid-template-columns:36px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.donut{width:104px;height:104px;border-radius:50%;display:grid;place-items:center;flex:none}
+.donut div{width:70px;height:70px;border-radius:50%;background:var(--surface);display:grid;place-items:center;text-align:center;font:800 22px var(--head);line-height:1}
+/* phone (E layout) */
+.phones{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}
+.phone{position:relative;width:375px;height:760px;border-radius:38px;border:10px solid #111;background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+.pbody{flex:1;overflow:auto;padding:18px 16px;display:grid;gap:12px;align-content:start}
+.pin{padding:0 16px 12px;background:var(--bg)}
+.go{font:700 17px var(--body);padding:16px;border-radius:999px;background:var(--accent);color:#fff;border:0;width:100%}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:var(--surface);padding:10px 0 18px;font-size:12px;text-align:center;color:var(--muted);font-weight:600}
+.tabs span::before{content:"";display:block;width:22px;height:22px;margin:0 auto 4px;border-radius:8px;background:currentColor;opacity:.25}
+.tabs .on{color:var(--accent)}.tabs .on::before{opacity:1}
+.ring{width:72px;height:72px;border-radius:50%;background:conic-gradient(var(--accent) 0 25%,var(--sand) 0);display:grid;place-items:center}
+.ring div{width:56px;height:56px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font:800 16px var(--head)}
+.map{height:130px;background:repeating-linear-gradient(45deg,#E6EFEA 0 12px,#EEF4F0 12px 24px);display:grid;place-items:center;color:var(--muted);font-size:12px}
+.later{display:flex;gap:8px;overflow:auto;padding-bottom:4px}
+.later .tile{min-width:140px;padding:12px;border-radius:14px}
+.field{display:grid;gap:6px}.field label{font-size:13px;font-weight:600}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.thumbs div{aspect-ratio:1;border-radius:14px;background:var(--accent-soft)}
+.thumbs div.add{background:transparent;border:2px dashed var(--line);display:grid;place-items:center;color:var(--muted);font-size:24px}
+</style>
+</head>
+<body>
+<div class="picker" role="toolbar" aria-label="Desktop variant">
+  <strong>Desktop variant:</strong>
+  <button data-v="1">C1 · Sidebar bento</button>
+  <button data-v="2">C2 · Schedule bento</button>
+  <button data-v="3">C3 · Bento + activity feed</button>
+  <small>Login = A layout · Colours = C · Phone = E layout · Throwaway</small>
+</div>
+
+<div class="wrap">
+
+<section><p class="label">Login — A layout, C colours</p>
+  <div class="frame login">
+    <div class="hero"><div class="brand"><i></i>Sejuk Sejuk Ops</div>
+      <div><h1 id="hl">Every job, from order to closed.</h1><p class="small" style="margin-top:16px;max-width:40ch">Orders, assignments, completions and reviews for every technician, in one place.</p></div>
+      <span class="small">v1.0 · demo environment</span></div>
+    <div class="lform"><h2 style="font-size:28px">Sign in</h2><input placeholder="you@sejuksejuk.my"><input type="password" placeholder="Password"><button class="btn primary">Sign in</button>
+      <div class="small" style="margin-top:6px">Demo — sign in as</div>
+      <div class="quick"><button class="btn">Admin</button><button class="btn">Manager</button><button class="btn">Ali</button><button class="btn">John</button><button class="btn">Bala</button><button class="btn">Yusoff</button></div></div>
+  </div></section>
+
+<section><p class="label">Admin / Manager home — bento variants in C colours</p>
+  <div class="notes" id="notes"></div>
+
+  <!-- C1 -->
+  <div class="frame desk v1 variant" data-v="1">
+    <nav><div class="brand" style="color:#fff;margin:0 8px 22px"><i></i>Sejuk Sejuk</div>
+      <a class="on" href="#">Home</a><a href="#">Orders <span>128</span></a><a href="#">Review queue <span>7</span></a><a href="#">Calendar</a><a href="#">Dashboard</a><a href="#">Flags <span>4</span></a><a href="#">Technicians</a><a href="#">Audit log</a>
+      <div style="margin-top:auto;display:flex;gap:10px;align-items:center;padding:0 8px"><div class="av">AI</div><div><div style="font-size:14px;color:#fff">Aisyah</div><div style="font-size:12px">Admin</div></div></div></nav>
+    <main>
+      <div class="row"><div><div class="small">Friday, 27 Nov 2026</div><h2 style="font-size:32px">Morning, Aisyah</h2></div><div style="display:flex;gap:8px"><input placeholder="Search order, name, phone" style="width:260px;padding:10px 14px;border-radius:999px"><button class="btn primary">+ New order</button></div></div>
+      <div class="grid">
+        <div class="tile" style="grid-column:span 2;grid-row:span 3">
+          <div class="row"><h3>Review queue</h3><span class="chip st">7 waiting</span></div>
+          <div style="margin-top:8px">
+            <div class="qi"><span class="dot c-high"></span><span><b>Ahmad</b> <span class="small mono">ORD-0012 · Ali</span></span><span>RM 370</span><button class="btn sm">Open</button></div>
+            <div class="qi"><span class="dot c-high"></span><span><b>Lim</b> <span class="small mono">ORD-0040 · Bala</span></span><span>RM 300</span><button class="btn sm">Open</button></div>
+            <div class="qi"><span class="dot c-med"></span><span><b>Mei Ling</b> <span class="small mono">ORD-0009 · Bala</span></span><span>RM 150</span><button class="btn sm">Open</button></div>
+            <div class="qi"><span class="dot c-low"></span><span><b>Kumar</b> <span class="small mono">ORD-0031 · John</span></span><span>RM 220</span><button class="btn sm">Open</button></div>
+            <div class="qi"><span class="dot" style="color:var(--line)"></span><span><b>Farah</b> <span class="small mono">ORD-0029 · Yusoff</span></span><span>RM 1,200</span><button class="btn sm">Approve</button></div>
+            <div class="qi"><span class="dot" style="color:var(--line)"></span><span><b>Raj</b> <span class="small mono">ORD-0024 · Ali</span></span><span>RM 150</span><button class="btn sm">Approve</button></div>
+          </div>
+          <button class="btn" style="margin-top:auto">See all 7</button></div>
+        <div class="tile dark"><span class="small">Jobs today</span><div class="big" style="margin-top:auto">14</div>
+          <div class="stack" style="margin-top:10px"><b style="flex:2;background:var(--s-new)"></b><b style="flex:5;background:var(--s-asg)"></b><b style="flex:3;background:#2DD4BF"></b><b style="flex:4;background:#A78BFA"></b></div></div>
+        <div class="tile"><span class="small">Open flags</span>
+          <div style="margin-top:auto;display:grid;gap:6px;font-size:14px;font-weight:600"><div class="row"><span class="c-high"><span class="dot"></span> High</span><span>2</span></div><div class="row"><span class="c-med"><span class="dot"></span> Medium</span><span>1</span></div><div class="row"><span class="c-low"><span class="dot"></span> Low</span><span>1</span></div></div></div>
+        <div class="tile" style="grid-column:span 2"><div class="row"><span class="small">Revenue this week</span><b class="head" style="font-size:22px">RM 18,420</b></div>
+          <div class="weekbars"><div style="height:60%"><span>Mon</span></div><div style="height:75%"><span>Tue</span></div><div style="height:50%"><span>Wed</span></div><div style="height:90%"><span>Thu</span></div><div class="t" style="height:40%"><span>Fri</span></div><div style="height:4%"><span>Sat</span></div><div style="height:4%"><span>Sun</span></div></div></div>
+        <div class="tile" style="grid-column:span 2"><span class="small">Technicians today</span>
+          <div style="margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;font-size:14px">
+            <div class="row"><div class="av">AL</div><div class="bar"><b style="width:80%"></b></div><span>4</span></div>
+            <div class="row"><div class="av">JO</div><div class="bar"><b style="width:60%"></b></div><span>3</span></div>
+            <div class="row"><div class="av" style="background:var(--high-soft);color:var(--high)">BA</div><div class="bar"><b style="width:100%;background:var(--high)"></b></div><span>5</span></div>
+            <div class="row"><div class="av">YU</div><div class="bar"><b style="width:40%"></b></div><span>2</span></div></div></div>
+      </div>
+    </main>
+    <button class="fab" aria-label="Ask AI"></button>
+  </div>
+
+  <!-- C2 -->
+  <div class="frame desk v2 variant" data-v="2" hidden>
+    <header><div class="brand"><i></i>Sejuk Sejuk</div><div class="pills"><span class="on">Home</span><span>Orders</span><span>Review</span><span>Calendar</span><span>Dashboard</span><span>Team</span><span>Audit</span></div>
+      <input placeholder="Search order, name, phone" style="width:240px;margin-left:auto;padding:9px 14px;border-radius:999px"><button class="btn primary">+ New order</button><div class="av">AI</div></header>
+    <main>
+      <div class="row"><div><div class="small">Friday, 27 Nov 2026</div><h2 style="font-size:30px">Morning, Aisyah</h2></div></div>
+      <div class="grid">
+        <div class="tile k dark"><span class="small">Jobs today</span><div class="n">14</div></div>
+        <div class="tile k"><span class="small">In progress</span><div class="n">3</div></div>
+        <div class="tile k"><span class="small">Awaiting review</span><div class="n">7</div></div>
+        <div class="tile k teal"><span class="small">Week revenue</span><div class="n" style="font-size:26px">RM 18.4k</div></div>
+        <div class="tile" style="grid-column:span 2;padding:14px 16px"><span class="small">Open flags · by severity</span>
+          <div class="stack" style="height:14px;margin:12px 0 8px"><b style="flex:2;background:var(--high)"></b><b style="flex:1;background:var(--med)"></b><b style="flex:1;background:#EAB308"></b></div>
+          <div class="legend"><span style="--c:var(--high)">High 2</span><span style="--c:var(--med)">Medium 1</span><span style="--c:#EAB308">Low 1</span></div></div>
+        <div class="tile" style="grid-column:span 4;grid-row:span 2">
+          <div class="row"><h3>Today's schedule</h3><div class="legend"><span style="--c:var(--s-rev)">Done</span><span style="--c:var(--s-prog)">In progress</span><span style="--c:var(--s-asg)">Assigned</span><span style="--c:var(--high)">Flagged</span></div></div>
+          <div class="gantt">
+            <span></span><div class="hours"><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span></div>
+            <b>Ali</b><div class="lane"><div class="now" style="left:28%"></div><div class="blk" style="left:10%;width:15%;background:var(--high)">ORD-0012 ⚑</div><div class="blk" style="left:45%;width:12%;background:var(--s-asg)">Repair</div><div class="blk" style="left:70%;width:10%;background:var(--s-asg)">Gas</div><div class="blk" style="left:88%;width:10%;background:var(--s-asg)">Install</div></div>
+            <b>John</b><div class="lane"><div class="now" style="left:28%"></div><div class="blk" style="left:2%;width:14%;background:var(--s-rev)">Cleaning</div><div class="blk" style="left:50%;width:15%;background:var(--s-asg)">ORD-0018</div><div class="blk" style="left:75%;width:12%;background:var(--s-asg)">Inspect</div></div>
+            <b>Bala</b><div class="lane"><div class="now" style="left:28%"></div><div class="blk" style="left:5%;width:12%;background:var(--med)">ORD-0009</div><div class="blk" style="left:18%;width:14%;background:var(--s-prog)">Cleaning</div><div class="blk" style="left:40%;width:12%;background:var(--s-asg)">Repair</div><div class="blk" style="left:60%;width:12%;background:var(--s-asg)">Gas</div><div class="blk" style="left:80%;width:12%;background:var(--s-asg)">Clean</div></div>
+            <b>Yusoff</b><div class="lane"><div class="now" style="left:28%"></div><div class="blk" style="left:20%;width:20%;background:var(--s-prog)">ORD-0016 Repair</div><div class="blk" style="left:88%;width:10%;background:var(--s-asg)">Install</div></div>
+            <b class="small">Unassigned</b><div class="lane" style="background:repeating-linear-gradient(45deg,var(--bg) 0 8px,#EFE7DB 8px 16px)"><div class="blk" style="left:60%;width:12%;background:var(--s-new)">Tan</div><div class="blk" style="left:85%;width:12%;background:var(--s-new)">Wong</div></div>
+          </div></div>
+        <div class="tile" style="grid-column:span 2;grid-row:span 2">
+          <div class="row"><h3>Review queue</h3><span class="chip st">7</span></div>
+          <div style="margin-top:6px">
+            <div class="qi" style="grid-template-columns:14px 1fr auto"><span class="dot c-high"></span><span><b>Ahmad</b><br><span class="small">+48% vs quote</span></span><span>RM 370</span></div>
+            <div class="qi" style="grid-template-columns:14px 1fr auto"><span class="dot c-high"></span><span><b>Lim</b><br><span class="small">RM 80 unpaid</span></span><span>RM 300</span></div>
+            <div class="qi" style="grid-template-columns:14px 1fr auto"><span class="dot c-med"></span><span><b>Mei Ling</b><br><span class="small">No photos</span></span><span>RM 150</span></div>
+            <div class="qi" style="grid-template-columns:14px 1fr auto"><span class="dot c-low"></span><span><b>Kumar</b><br><span class="small">+RM 40, explained</span></span><span>RM 220</span></div>
+          </div><button class="btn" style="margin-top:auto">Open review queue</button></div>
+      </div>
+    </main>
+    <button class="fab" aria-label="Ask AI"></button>
+  </div>
+
+  <!-- C3 -->
+  <div class="frame desk v3 variant" data-v="3" hidden>
+    <div class="rail"><div class="brand"><i></i></div><span class="on">Home</span><span>Orders</span><span>Review</span><span>Cal</span><span>KPIs</span><span>Team</span><span>Audit</span></div>
+    <main>
+      <div class="tile teal" style="grid-column:span 2;grid-row:span 2;padding:24px">
+        <span class="small">Friday, 27 Nov 2026</span>
+        <h2 style="font-size:clamp(24px,2.6vw,36px);margin-top:6px;line-height:1.05">Morning, Aisyah.<br>7 jobs need review, 2 are urgent.</h2>
+        <div style="display:flex;gap:8px;margin-top:auto"><button class="btn" style="background:#fff;border-color:#fff">+ New order</button><button class="btn" style="background:transparent;color:#fff;border-color:#ffffff66">Review queue</button><button class="btn" style="background:transparent;color:#fff;border-color:#ffffff66">Calendar</button></div></div>
+      <div class="tile" style="grid-row:span 2"><span class="small">Today by status</span>
+        <div style="display:flex;gap:16px;align-items:center;margin-top:auto">
+          <div class="donut" style="background:conic-gradient(var(--s-new) 0 14%,var(--s-asg) 0 50%,var(--s-prog) 0 71%,var(--s-done) 0 100%)"><div>14</div></div>
+          <div class="legend" style="flex-direction:column"><span style="--c:var(--s-new)">New 2</span><span style="--c:var(--s-asg)">Assigned 5</span><span style="--c:var(--s-prog)">In progress 3</span><span style="--c:var(--s-done)">Job done 4</span></div></div></div>
+      <div class="tile" style="grid-column:span 2;grid-row:span 2"><div class="row"><h3>Review queue</h3><span class="small">sorted by flag severity</span></div>
+        <div style="margin-top:6px">
+          <div class="qi"><span class="dot c-high"></span><span><b>Ahmad</b> <span class="small">· Ali · +48% vs quote</span></span><span>RM 370</span><button class="btn sm">Open</button></div>
+          <div class="qi"><span class="dot c-high"></span><span><b>Lim</b> <span class="small">· Bala · RM 80 unpaid</span></span><span>RM 300</span><button class="btn sm">Open</button></div>
+          <div class="qi"><span class="dot c-med"></span><span><b>Mei Ling</b> <span class="small">· Bala · no photos</span></span><span>RM 150</span><button class="btn sm">Open</button></div>
+          <div class="qi"><span class="dot c-low"></span><span><b>Kumar</b> <span class="small">· John · +RM 40</span></span><span>RM 220</span><button class="btn sm">Open</button></div>
+        </div></div>
+      <div class="tile dark"><span class="small">Week revenue</span><div class="big" style="margin-top:auto;font-size:38px">RM 18,420</div><span class="small">+12% vs last week</span></div>
+      <div class="tile" style="grid-column:span 2"><span class="small">Next 5 days</span>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:auto">
+          <div style="background:var(--ink);color:#fff;border-radius:12px;padding:8px;text-align:center;font-size:12px">Fri<b style="display:block;font-size:20px">14</b></div>
+          <div style="background:var(--bg);border-radius:12px;padding:8px;text-align:center;font-size:12px">Sat<b style="display:block;font-size:20px">11</b></div>
+          <div style="background:var(--bg);border-radius:12px;padding:8px;text-align:center;font-size:12px">Sun<b style="display:block;font-size:20px">3</b></div>
+          <div style="background:var(--bg);border-radius:12px;padding:8px;text-align:center;font-size:12px">Mon<b style="display:block;font-size:20px">16</b></div>
+          <div style="background:var(--bg);border-radius:12px;padding:8px;text-align:center;font-size:12px">Tue<b style="display:block;font-size:20px">12</b></div></div></div>
+      <div class="tile"><span class="small">On duty</span><div style="display:flex;margin-top:auto"><div class="av" style="border:3px solid var(--surface)">AL</div><div class="av" style="border:3px solid var(--surface);margin-left:-8px">JO</div><div class="av" style="border:3px solid var(--surface);margin-left:-8px;background:var(--high-soft);color:var(--high)">BA</div><div class="av" style="border:3px solid var(--surface);margin-left:-8px">YU</div></div><span class="small" style="margin-top:6px">Bala at 5 jobs</span></div>
+    </main>
+    <aside><h3 style="font-size:18px;margin-bottom:6px">Live activity</h3>
+      <div class="feed"><div class="av">AL</div><div><b>Ali</b> marked ORD-0012 job done<div class="small">10:41</div></div></div>
+      <div class="feed"><div class="av" style="background:var(--high-soft);color:var(--high)">!</div><div><b>High flag</b> on ORD-0012: final 48% above quote<div class="small">10:41</div></div></div>
+      <div class="feed"><div class="av">SY</div><div>Feedback request sent to Ahmad on WhatsApp<div class="small">10:42</div></div></div>
+      <div class="feed"><div class="av">YU</div><div><b>Yusoff</b> started ORD-0016<div class="small">11:02</div></div></div>
+      <div class="feed"><div class="av">AI</div><div><b>Aisyah</b> assigned ORD-0018 to John<div class="small">11:10</div></div></div>
+      <div class="feed" style="border:0"><div class="av" style="background:var(--ok-soft);color:var(--ok)">✓</div><div>Flag on ORD-0027 resolved<div class="small">11:15</div></div></div>
+    </aside>
+    <button class="fab" aria-label="Ask AI"></button>
+  </div>
+</section>
+
+<section><p class="label">Technician — E layout, C colours (375px)</p>
+  <div class="phones">
+    <div class="phone"><div class="pbody">
+      <div class="row"><div><div class="small">Fri 27 Nov</div><h2 style="font-size:28px">Hi Ali</h2></div><div class="ring"><div>1/4</div></div></div>
+      <div class="tile" style="padding:0;overflow:hidden"><div class="map">map preview</div>
+        <div style="padding:16px;display:grid;gap:8px"><div class="row"><span class="chip st">Next · 10:00</span><span class="mono small">ORD-0014</span></div>
+          <div class="head" style="font-size:24px">Aircond cleaning</div><div>No. 12, Jalan Sejuk 3/2, Shah Alam</div>
+          <div class="row"><button class="btn" style="flex:1">Navigate</button><button class="btn" style="flex:1">Call Ahmad</button></div></div></div>
+      <div class="small" style="font-weight:600">Later today</div>
+      <div class="later"><div class="tile"><b>12:30</b><span class="small">Repair · Subang</span></div><div class="tile"><b>15:00</b><span class="small">Gas refill · Klang</span></div><div class="tile"><b>17:00</b><span class="small">Install · Shah Alam</span></div></div>
+    </div><div class="pin"><button class="go">Start job</button></div><div class="tabs"><span class="on">Today</span><span>Upcoming</span><span>History</span></div><button class="fab" aria-label="Ask AI"></button></div>
+
+    <div class="phone"><div class="pbody">
+      <div class="row"><div><div class="small mono">ORD-0014 · In progress</div><h2 style="font-size:26px">Complete job</h2></div><span class="chip st">Ali · 10:41</span></div>
+      <div class="field"><label>Work done</label><input value="Chemical wash 2 units, replaced drain pipe"></div>
+      <div class="tile" style="padding:14px;gap:8px;display:grid">
+        <div class="row"><span class="small">Quoted</span><span>RM 250.00</span></div>
+        <div class="row"><span class="small">Extra charges</span><input value="120.00" style="width:110px;text-align:right;padding:8px 10px"></div>
+        <div class="row" style="border-top:1px solid var(--line);padding-top:8px"><b>Final amount</b><b class="head" style="font-size:24px">RM 370.00</b></div>
+        <span class="chip f-high" style="justify-self:start"><span class="dot"></span>48% above quote — remarks required</span></div>
+      <div class="field"><div class="row"><label>Photos, video, PDF</label><span class="small">3 / 6</span></div><div class="thumbs"><div></div><div></div><div></div><div class="add">+</div></div></div>
+      <div class="field"><label>Remarks</label><input placeholder="Why the extra charge?"></div>
+    </div><div class="pin"><button class="go">Mark job done</button></div><div class="tabs"><span class="on">Today</span><span>Upcoming</span><span>History</span></div><button class="fab" aria-label="Ask AI"></button></div>
+  </div>
+</section>
+</div>
+
+<script>
+const notes={
+1:"<b>C1 · Sidebar bento</b> — dark ink sidebar with teal pill for the active page; bento of review queue (with quick Approve on clean jobs), jobs-today with status bar, flags by severity, week revenue chart, technician load.",
+2:"<b>C2 · Schedule bento</b> — no sidebar; pill nav in a top bar. KPI tiles across the top, then a technician-by-hour schedule (gantt) with a red 'now' line, and the review queue beside it. Best for seeing who is free.",
+3:"<b>C3 · Bento + activity feed</b> — icon rail; a large teal greeting tile that says what needs doing, status donut, review queue, revenue, next 5 days, team on duty; right rail streams the live audit log."};
+const spark='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>';
+const panel='<div class="ai" hidden><div class="row"><b>Ask Sejuk AI</b><span class="small">Esc</span></div><div class="q">Which technician completed the most jobs this week?</div><div class="a">Bala completed 11 jobs this week — the team average is 7.<div class="src">Based on: technician_leaderboard · this week</div></div><input placeholder="Ask about jobs, technicians, flags…"></div>';
+document.querySelectorAll('.fab').forEach(f=>{f.innerHTML=spark;f.insertAdjacentHTML('beforebegin',panel);f.onclick=()=>{const p=f.previousElementSibling;p.hidden=!p.hidden}});
+const h=document.getElementById('hl');h.innerHTML=h.textContent.split(' ').map((w,i)=>`<span class="w" style="animation-delay:${i*110}ms">${w}</span>`).join(' ');
+function set(v){document.querySelectorAll('.picker button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
+ document.querySelectorAll('.variant').forEach(x=>x.hidden=x.dataset.v!==v);document.getElementById('notes').innerHTML=notes[v];}
+document.querySelectorAll('.picker button').forEach(b=>b.onclick=()=>set(b.dataset.v));
+set('1');
+</script>
+</body>
+</html>
