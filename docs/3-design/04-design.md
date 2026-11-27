@@ -192,7 +192,8 @@ Approved visual reference: [mockup-v3.html](mockup-v3.html) (contains rejected v
 | Technician | **E layout**: map-first next-job card, day-progress ring, later jobs scroller, pinned primary action, bottom tabs (Today / Upcoming / History) |
 | AI | Round sparkle button fixed bottom-right on every screen; slide-up panel |
 | Palette (C) | bg `#F6F1EA`, surface `#FFFDF9`, ink `#1F2A2A`, muted `#5E6B66`, line `#E7DED2`, accent teal `#0F766E` |
-| Flags | High `#DC2626` 🔴, Medium `#EA580C` 🟠, Low `#CA8A04` 🟡, Resolved `#15803D` ✓ |
+| Flags | High `#DC2626` 🔴, Medium `#EA580C` 🟠, Low `#CA8A04` 🟡 (dots/bars; Low *text* on its pale chip uses `#A16207` for WCAG AA contrast), Resolved `#15803D` ✓ |
+| Statuses | New `#94A3B8`, Assigned `#0EA5E9`, In progress `#0F766E`, Job done `#7C3AED`, Reviewed `#15803D`, Closed `#5E6B66` (from the C2 schedule legend) |
 | Type | Headings Cabinet Grotesk 800 (Fontshare CDN, fallback Plus Jakarta Sans 800); body Plus Jakarta Sans (self-hosted, OFL); order numbers JetBrains Mono (OFL); tabular figures for money |
 | Motion | ≤ 200 ms functional transitions in-app; login heading animation; honours `prefers-reduced-motion`; no 3D/scroll effects |
 | Sound | UI SFX (CC0): job-done confirm, High-flag chime; on by default, per-user toggle |
