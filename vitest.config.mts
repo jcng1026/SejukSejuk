@@ -24,6 +24,9 @@ export default defineConfig(({ mode }) => ({
           // Local Supabase URL/keys from .env.local; CI exports them from `supabase status`.
           env: loadEnv(mode, process.cwd(), ""),
           testTimeout: 20_000,
+          // Every file shares one database, and some state is global (e.g. the per-person
+          // "jobs done today" counter), so files run one at a time to stay deterministic.
+          fileParallelism: false,
         },
       },
     ],

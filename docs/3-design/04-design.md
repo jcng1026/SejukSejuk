@@ -118,9 +118,9 @@ stateDiagram-v2
 A `BEFORE UPDATE` trigger on `orders` rejects any transition not in this table, so even a mistaken RPC cannot skip a state.
 
 **Side effects on `→ Job Done`** (one transaction, `AFTER UPDATE` trigger):
-1. Evaluate flag rules → insert `flags`.
-2. Insert `whatsapp_messages(kind='feedback')` with the brief's template and `wa.me` link.
-3. Insert `notifications` for admins/managers (High flags individually; otherwise one grouped "completed" row per recipient per day, updated with a count).
+1. Evaluate flag rules → insert `flags`. A job sent back and completed again is judged afresh: its open automatic flags are deleted first (audited); manual flags stay.
+2. Insert `whatsapp_messages(kind='feedback')` with the brief's template and `wa.me` link (replacing any unsent one).
+3. Insert `notifications` for admins/managers (High flags individually; otherwise one grouped "completed" row per recipient per day, updated with a count). A High-flagged job is not added to the grouped count.
 
 ## 5. Security — RLS matrix
 
@@ -198,7 +198,7 @@ Approved visual reference: [mockup-v3.html](mockup-v3.html) (contains rejected v
 | Statuses | New `#94A3B8`, Assigned `#0EA5E9`, In progress `#0F766E`, Job done `#7C3AED`, Reviewed `#15803D`, Closed `#5E6B66` (from the C2 schedule legend) |
 | Type | Headings Cabinet Grotesk 800 (Fontshare CDN, fallback Plus Jakarta Sans 800); body Plus Jakarta Sans (self-hosted, OFL); order numbers JetBrains Mono (OFL); tabular figures for money |
 | Motion | ≤ 200 ms functional transitions in-app; login heading animation; honours `prefers-reduced-motion`; no 3D/scroll effects |
-| Sound | UI SFX (CC0): job-done confirm, High-flag chime; on by default, per-user toggle |
+| Sound | Short tones synthesised with the Web Audio API (no audio files to license or download): job-done confirm, High-flag chime; on by default, per-user toggle |
 
 ## 9. Licensing policy
 - Commit only assets whose licence allows redistribution (OFL, MIT, CC0, Unsplash/Pexels, own work).

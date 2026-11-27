@@ -19,11 +19,17 @@ export function validationFailure(fields: Record<string, string>): Failure {
   };
 }
 
+/** A failure unless someone is signed in. */
+export async function requireSignedIn(): Promise<Failure | null> {
+  return (await getCurrentUser())
+    ? null
+    : fail("UNAUTHENTICATED", "Your session has ended. Sign in again.");
+}
+
 /** Signed in, and the record id from the browser is a real UUID; otherwise a failure. */
 export async function guardRecord(id: unknown, notFoundMessage: string): Promise<Failure | null> {
-  if (!(await getCurrentUser())) {
-    return fail("UNAUTHENTICATED", "Your session has ended. Sign in again.");
-  }
+  const signedOut = await requireSignedIn();
+  if (signedOut) return signedOut;
   return isUuid(id) ? null : fail("NOT_FOUND", notFoundMessage);
 }
 

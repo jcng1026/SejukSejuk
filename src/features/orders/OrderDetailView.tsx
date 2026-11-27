@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { RaiseFlagButton, ResolveFlagButton } from "@/features/flags/FlagActions";
+
 import { FlagChip, StatusBadge } from "./badges";
 import { PAYMENT_METHOD_LABEL, topOpenSeverity } from "./labels";
 import { formatSen } from "./money";
@@ -131,8 +133,10 @@ export function OrderDetailView({ order }: { order: OrderDetail }) {
           </dl>
         </Section>
 
-        {order.flags.length > 0 && (
-          <Section title="Flags">
+        {/* Staff-only view: admins and managers may raise and resolve flags. */}
+        <Section title="Flags">
+          <RaiseFlagButton orderId={order.id} />
+          {order.flags.length > 0 && (
             <ul className="flex flex-col gap-2 text-sm">
               {order.flags.map((flag) => (
                 <li key={flag.id} className="flex flex-col gap-1">
@@ -156,11 +160,14 @@ export function OrderDetailView({ order }: { order: OrderDetail }) {
                       {flag.resolutionNote && <>: “{flag.resolutionNote}”</>}
                     </span>
                   )}
+                  {flag.status === "open" && (
+                    <ResolveFlagButton flagId={flag.id} message={flag.message} />
+                  )}
                 </li>
               ))}
             </ul>
-          </Section>
-        )}
+          )}
+        </Section>
 
         <Section title="History">
           <ol className="flex flex-col gap-3 border-l-2 border-border pl-4 text-sm">

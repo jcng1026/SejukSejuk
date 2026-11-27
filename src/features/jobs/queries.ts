@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { OrderStatus } from "@/features/orders/labels";
+import { severityRank, type FlagSeverity, type OrderStatus } from "@/features/orders/labels";
 import { firstOf } from "@/features/orders/queries";
 import { mytDateTimeToIso, mytToday } from "@/features/orders/schedule";
 import { createClient } from "@/lib/supabase/server";
@@ -106,6 +106,8 @@ export interface TechJobDetail extends TechJob {
   problemDescription: string;
   adminNotes: string | null;
   attachments: { id: string; mime: string; url: string | null }[];
+  /** FR-FLG-4: open flags on this job, most serious first. */
+  openFlags: { id: string; severity: FlagSeverity; message: string }[];
   completion: {
     workDone: string;
     extraSen: number;
@@ -122,7 +124,8 @@ export async function getTechJob(id: string): Promise<TechJobDetail | null> {
       `id, order_no, status, customer_name, customer_phone, customer_address,
        scheduled_at, quoted_sen, service_types(name), problem_description, admin_notes,
        attachments(id, mime, storage_path, created_at),
-       completions(final_sen, work_done, extra_sen, remarks, completed_at)`,
+       completions(final_sen, work_done, extra_sen, remarks, completed_at),
+       flags(id, severity, status, message)`,
     )
     .eq("id", id)
     .maybeSingle();
@@ -133,6 +136,7 @@ export async function getTechJob(id: string): Promise<TechJobDetail | null> {
     problem_description: string;
     admin_notes: string | null;
     attachments: { id: string; mime: string; storage_path: string; created_at: string }[];
+    flags: { id: string; severity: FlagSeverity; status: string; message: string }[] | null;
     completions:
       | {
           final_sen: number;
@@ -172,6 +176,10 @@ export async function getTechJob(id: string): Promise<TechJobDetail | null> {
       mime: file.mime,
       url: urls.get(file.storage_path) ?? null,
     })),
+    openFlags: (row.flags ?? [])
+      .filter((flag) => flag.status === "open")
+      .map(({ id, severity, message }) => ({ id, severity, message }))
+      .toSorted((a, b) => severityRank(a.severity) - severityRank(b.severity)),
     completion: completion
       ? {
           workDone: completion.work_done,

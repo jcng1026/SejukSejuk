@@ -4,16 +4,28 @@ import { Suspense } from "react";
 
 import { Button } from "@/components/ui/button";
 import { OrderAdminActions, type EditableOrder } from "@/features/orders/OrderAdminActions";
+import { getFeedbackMessage } from "@/features/messages/queries";
+import { WhatsAppSendButton } from "@/features/messages/WhatsAppSendButton";
 import { getOrderDetail, type OrderDetail } from "@/features/orders/order-detail";
 import { OrderDetailView, OrderHeader } from "@/features/orders/OrderDetailView";
 import { isStoredPhone } from "@/features/orders/phone";
-import { listServiceTypes, listTechnicians, technicianDayLoad } from "@/features/orders/queries";
-import { mytParts } from "@/features/orders/schedule";
+import {
+  listServiceTypes,
+  listTechnicians,
+  technicianDayLoad,
+  type ServiceType,
+  type Technician,
+  type TechnicianJobSlot,
+} from "@/features/orders/queries";
+import { formatMytWhen, mytParts } from "@/features/orders/schedule";
 import { technicianJobMessage, whatsappLink } from "@/features/orders/whatsapp";
 import { requireUser } from "@/lib/auth";
 import { isUuid } from "@/lib/validation";
 
 export const metadata: Metadata = { title: "Order · Sejuk Sejuk Ops" };
+
+type AdminData = [ServiceType[], Technician[], TechnicianJobSlot[]];
+const NO_ADMIN_DATA: AdminData = [[], [], []];
 
 function toEditable(order: OrderDetail): EditableOrder {
   return {
@@ -58,13 +70,16 @@ async function Order({ params, searchParams }: PageProps<"/orders/[id]">) {
   if (!order) notFound();
 
   const isAdmin = user.role === "admin";
-  const [serviceTypes, technicians, dayLoad] = isAdmin
-    ? await Promise.all([
-        listServiceTypes(),
-        listTechnicians(),
-        technicianDayLoad(mytParts(order.scheduledAt).date),
-      ])
-    : [[], [], []];
+  const [feedback, [serviceTypes, technicians, dayLoad]] = await Promise.all([
+    order.completion ? getFeedbackMessage(order.id) : null,
+    isAdmin
+      ? Promise.all([
+          listServiceTypes(),
+          listTechnicians(),
+          technicianDayLoad(mytParts(order.scheduledAt).date),
+        ])
+      : Promise.resolve(NO_ADMIN_DATA),
+  ]);
 
   const justCreated = query.created === "1";
   const notifyLink = justCreated ? notifyTechnicianLink(order) : null;
@@ -97,6 +112,24 @@ async function Order({ params, searchParams }: PageProps<"/orders/[id]">) {
           />
         )}
       </div>
+      {feedback && (
+        <section
+          aria-label="Customer feedback"
+          className="flex flex-col gap-2 rounded-2xl border bg-card p-4 sm:max-w-sm"
+        >
+          <h2 className="text-lg">Customer feedback</h2>
+          {/* FR-NOT-2: admins may resend; managers see when it was sent. */}
+          {isAdmin ? (
+            <WhatsAppSendButton message={feedback} />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {feedback.sentAt
+                ? `Request last sent ${formatMytWhen(feedback.sentAt)}`
+                : "Request not sent yet"}
+            </p>
+          )}
+        </section>
+      )}
       <OrderDetailView order={order} />
     </div>
   );

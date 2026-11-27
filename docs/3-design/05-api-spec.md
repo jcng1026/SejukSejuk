@@ -63,15 +63,15 @@ Argument names are `p_`-prefixed in SQL (`id` → `p_order_id`, `reason` → `p_
 | `assign_order` | admin | id, technician_id, reason? | New→Assigned; reassign while Assigned, or override while In Progress (reason required for both) |
 | `reschedule_order` | admin | id, scheduled_at, reason | Updates time, `reschedule_count += 1` |
 | `start_job` | tech (assigned) / admin + reason | id, reason? | Assigned→In Progress, `started_at = now()` |
-| `complete_job` | tech (assigned) / admin + reason | id, work_done, extra_sen, remarks?, payment_amount_sen?, payment_method?, payment_receipt_path?, reason? | Writes completion and one payment per job (upsert), In Progress→Job Done; Phase 3 adds flags, WhatsApp, notifications. Attachments are registered separately (`register_attachment`, Phase 2) |
+| `complete_job` | tech (assigned) / admin + reason | id, work_done, extra_sen, remarks?, payment_amount_sen?, payment_method?, payment_receipt_path?, reason? | Writes completion and one payment per job (upsert), In Progress→Job Done; the `orders_on_job_done` trigger then raises flags, queues the WhatsApp message and notifies staff (design §4). Attachments are registered separately (`register_attachment`, Phase 2) |
 | `review_order` | manager | id, decision `approve`\|`send_back`, reason? | Job Done→Reviewed, or →In Progress (reason required) |
 | `close_order` | manager | id, note? | Reviewed→Closed; note required when payment < final |
 | `raise_flag` | admin, manager | order_id, severity, message | Manual flag |
 | `resolve_flag` | admin, manager | flag_id, note | Open→Resolved |
-| `mark_whatsapp_sent` | tech (own), admin | message_id | Sets `sent_at`, `sent_by` |
+| `mark_whatsapp_sent` | tech (own), admin | message_id | Sets `sent_at`, `sent_by`; every send is kept in `audit_log` |
 | `set_technician_active` | manager | profile_id, active | Fails if deactivating with open jobs |
 | `set_sound_enabled` | any | enabled | Own profile |
-| `mark_notifications_read` | any | ids[] \| all | Own rows |
+| `mark_notifications_read` | any | — | Marks all of the caller's unread rows (the bell opens the whole list) |
 | ~~`technician_day_load`~~ | — | — | Not an RPC: a plain read under RLS (`technicianDayLoad` in `src/features/orders/queries.ts`); counts and clashes are computed client-side by `findClashes` |
 
 **Read RPCs used by AI tools** (also used by dashboard): `ai_jobs_list`, `ai_job_detail`, `ai_job_counts`, `ai_technician_leaderboard`, `ai_technician_workload`, `ai_flags_summary`, `ai_revenue_summary`. Each enforces role inside the function in addition to RLS and returns only the columns listed in §4.
@@ -124,7 +124,7 @@ How to read it: **Front-end call** is what the screen invokes. A *Server Compone
 ### Review and flags
 | Screen / control | Front-end call | Backend | Role |
 |---|---|---|---|
-| Review queue page | Server Component | `orders` where `status = job_done` + open flags | Manager |
+| Review queue page | Server Component | `orders` where `status = job_done` (worst open flag first, then oldest; sorted in the app over up to 500 rows) and `reviewed` orders ready to close | Manager (admins view read-only) |
 | Approve / Send back | `reviewOrder` action | `review_order` | Manager |
 | Close order | `closeOrder` action | `close_order` | Manager |
 | Flags page | Server Component | `flags` joined to `orders`, sorted High → Low | Admin, Manager |
@@ -154,7 +154,7 @@ How to read it: **Front-end call** is what the screen invokes. A *Server Compone
 ### Shared (every screen)
 | Screen / control | Front-end call | Backend | Role |
 |---|---|---|---|
-| Bell (list + unread count) | Server Component + Realtime subscription | `notifications` where `recipient_id = auth.uid()`; `notifications` channel | All |
+| Bell (list + unread count) | Client Component + Realtime subscription | `notifications` where `recipient_id = auth.uid()`; `notifications` channel | Admin, Manager |
 | Bell → mark read | `markNotificationsRead` action | `mark_notifications_read` | All |
 | Sound toggle | `setSoundEnabled` action | `set_sound_enabled` | All |
 | AI button → chat panel | `fetch('POST /api/ai/chat')` | Guardrail pipeline → `ai_*` read RPCs + Groq | All |
@@ -214,6 +214,10 @@ Anything else → block (`stage: "intent"`).
 | Channel | Filter | Consumer |
 |---|---|---|
 | `notifications` (postgres_changes INSERT/UPDATE) | `recipient_id=eq.{uid}` | Bell + chime |
+
+Notification rows: `type = 'flag'` (`severity = 'high'`, payload `{order_no, message}`, one per High-flagged job) or `type = 'jobs_done'` (payload `{count}`, one row per recipient per MYT day, count incremented and marked unread on each clean completion).
+
+Automatic flag `rule_code`s: `over_quote` (High, final > quote + 20%), `extras_without_remarks` (High), `underpaid` (High, payment recorded below final), `no_attachments` (Medium), `over_quote_explained` (Low, extra ≤ 20% with remarks), `late_completion` (Low, > 24 h after schedule). Thresholds come from `app_config` (`flag.over_quote_pct`, `flag.late_hours`).
 | `orders` (UPDATE) | admin/manager only | Home schedule and review queue refresh |
 
 ## 6. WhatsApp deep link format

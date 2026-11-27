@@ -4,7 +4,10 @@ import { CompleteJobForm } from "@/features/jobs/CompleteJobForm";
 import { mapsLink } from "@/features/jobs/JobCards";
 import { getTechJob } from "@/features/jobs/queries";
 import { StartJobButton } from "@/features/jobs/StartJobButton";
-import { StatusBadge } from "@/features/orders/badges";
+import { getFeedbackMessage } from "@/features/messages/queries";
+import { PlaySound } from "@/features/notifications/PlaySound";
+import { WhatsAppSendButton } from "@/features/messages/WhatsAppSendButton";
+import { FlagChip, StatusBadge } from "@/features/orders/badges";
 import { formatSen } from "@/features/orders/money";
 import { formatPhone } from "@/features/orders/phone";
 import { formatMytWhen } from "@/features/orders/schedule";
@@ -20,6 +23,7 @@ export default async function TechnicianJobPage({
   if (!isUuid(id)) notFound();
   const job = await getTechJob(id);
   if (!job) notFound();
+  const feedback = job.completion ? await getFeedbackMessage(job.id) : null;
 
   return (
     <>
@@ -29,6 +33,7 @@ export default async function TechnicianJobPage({
           className="rounded-2xl bg-flag-resolved-soft p-4 font-semibold text-flag-resolved"
         >
           ✓ Job marked done. Nice work.
+          <PlaySound kind="job_done" />
         </p>
       )}
 
@@ -82,6 +87,23 @@ export default async function TechnicianJobPage({
         </p>
       </section>
 
+      {job.openFlags.length > 0 && (
+        <section
+          aria-label="Flags on this job"
+          className="flex flex-col gap-2 rounded-2xl border bg-card p-4 text-sm"
+        >
+          <h2 className="font-semibold">Flags from the office</h2>
+          <ul className="flex flex-col gap-2">
+            {job.openFlags.map((flag) => (
+              <li key={flag.id} className="flex flex-col items-start gap-1">
+                <FlagChip severity={flag.severity} />
+                <span>{flag.message}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {job.status === "assigned" && <StartJobButton orderId={job.id} />}
 
       {job.status === "in_progress" && (
@@ -93,6 +115,8 @@ export default async function TechnicianJobPage({
           alreadyAttached={job.attachments.length}
         />
       )}
+
+      {feedback && <WhatsAppSendButton message={feedback} />}
 
       {job.completion && (
         <section

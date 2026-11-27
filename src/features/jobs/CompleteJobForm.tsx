@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { errorProps, FormField } from "@/features/orders/FormField";
 import { formatSen, parseRinggitToSen } from "@/features/orders/money";
+import { primeAudio } from "@/features/notifications/sound";
 import type { FormState } from "@/lib/result";
 
 import { completeJobAction } from "./actions";
@@ -54,6 +55,8 @@ export function CompleteJobForm({
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (isSubmitting || blocker) return;
+    // Unlock audio during the tap so the success screen can play the job-done sound.
+    primeAudio();
     const formData = new FormData(event.currentTarget);
     startTransition(() => submit(formData));
   }

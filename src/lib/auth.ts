@@ -12,6 +12,8 @@ export interface CurrentUser {
   id: string;
   fullName: string;
   role: Role;
+  /** FR-NOT-4: sounds are on unless the user switched them off. */
+  soundEnabled: boolean;
 }
 
 /**
@@ -30,13 +32,18 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("id, full_name, role")
+    .select("id, full_name, role, sound_enabled")
     .eq("id", userId)
     .maybeSingle();
   if (error) throw new Error(`Could not load profile: ${error.message}`);
   if (!profile || !isRole(profile.role)) return null;
 
-  return { id: profile.id, fullName: profile.full_name, role: profile.role };
+  return {
+    id: profile.id,
+    fullName: profile.full_name,
+    role: profile.role,
+    soundEnabled: profile.sound_enabled,
+  };
 });
 
 /** Returns the user if their role may open this page; otherwise redirects. */

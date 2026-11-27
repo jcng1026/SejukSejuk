@@ -40,6 +40,7 @@
   --color-flag-low-soft: var(--flag-low-soft);
   --color-flag-resolved: var(--flag-resolved);
   --color-flag-resolved-soft: var(--flag-resolved-soft);
+  --color-whatsapp: var(--whatsapp);
   --color-status-new: var(--status-new);
   --color-status-assigned: var(--status-assigned);
   --color-status-in-progress: var(--status-in-progress);
@@ -106,6 +107,8 @@
   --flag-low-foreground: #a16207; /* text on --flag-low-soft: #ca8a04 fails WCAG AA there */
   --flag-low-soft: #fef9c3;
   --flag-resolved: #15803d;
+  /* WhatsApp action green, darkened from brand #25D366 for 4.5:1 with white text. */
+  --whatsapp: #1f8f4e;
   --flag-resolved-soft: #dcfce7;
 
   --status-new: #94a3b8;

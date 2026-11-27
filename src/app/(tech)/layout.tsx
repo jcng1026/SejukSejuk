@@ -3,6 +3,14 @@ import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/features/auth/actions";
 import { TechTabs } from "@/features/jobs/TechTabs";
+import { SoundToggle } from "@/features/notifications/SoundToggle";
+import { requireUser } from "@/lib/auth";
+
+/** Reads the session, so it renders inside Suspense. */
+async function TechSoundToggle() {
+  const user = await requireUser(["technician"]);
+  return <SoundToggle initialEnabled={user.soundEnabled} className="h-11 px-4" />;
+}
 
 function TechHeader() {
   return (
@@ -11,11 +19,16 @@ function TechHeader() {
         <span aria-hidden="true" className="inline-block size-6 rounded-lg bg-primary" />
         Sejuk Sejuk
       </span>
-      <form action={signOut}>
-        <Button type="submit" variant="ghost" size="sm" className="rounded-full">
-          Sign out
-        </Button>
-      </form>
+      <div className="flex items-center gap-1">
+        <Suspense fallback={null}>
+          <TechSoundToggle />
+        </Suspense>
+        <form action={signOut}>
+          <Button type="submit" variant="ghost" size="sm" className="h-11 rounded-full px-4">
+            Sign out
+          </Button>
+        </form>
+      </div>
     </header>
   );
 }
