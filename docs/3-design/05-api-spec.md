@@ -83,7 +83,7 @@ One per write RPC, colocated with its feature (`src/features/<feature>/actions.t
 3. Calls the RPC; maps errors to the envelope.
 4. `revalidatePath` for affected pages.
 
-File uploads: `createUploadUrls(orderId, files[{name, mime, size}])` → validates count/size/mime and returns signed upload URLs for `job-files/orders/{orderId}/{uuid}-{name}`; the client uploads directly to Storage, then passes the resulting attachment ids to `completeJob`.
+File uploads: the browser uploads directly to Storage with the user's session (path `job-files/orders/{orderId}/{uuid}-{name}`), allowed by the `storage.objects` policy only for the assigned technician's open job and only while the folder holds fewer than 12 objects. It then calls `registerAttachmentAction(orderId, path)` → `register_attachment(p_order_id, p_storage_path)`, which reads **type and size from Storage's own object metadata** (never from the browser) and enforces the type list, 10 MB / 50 MB limits and ≤ 6 files. Photos are compressed in the browser first. A file whose registration fails stays in the folder as an orphan (bounded by the 12-object cap) and can be retried without re-uploading. The payment receipt is uploaded the same way but not registered: it sits outside the 6-file limit and `complete_job` checks it exists and is an image or PDF.
 
 ## 3a. Screen-to-backend map
 
@@ -137,7 +137,7 @@ How to read it: **Front-end call** is what the screen invokes. A *Server Compone
 | Today / Upcoming / History tabs | Server Component | `orders` where `technician_id = auth.uid()` (RLS), filtered by date | Technician |
 | Next-job card → Navigate / Call | Links (no call) | Google Maps URL / `tel:` from the order | Technician |
 | Start job | `startJob` action | `start_job` | Technician |
-| Completion → add files | `createUploadUrls` action, then direct upload | Storage `createSignedUploadUrl` → `job-files/orders/{id}/…`; `attachments` insert | Technician |
+| Completion → add files | direct `storage.upload` (user session, RLS), then `registerAttachmentAction` | `register_attachment` | Technician |
 | Completion → Mark job done | `completeJob` action | `complete_job` (fires flag, WhatsApp and notification triggers) | Technician |
 | Success → Send feedback on WhatsApp | Link + `markWhatsappSent` action | `whatsapp_messages` row → `mark_whatsapp_sent` | Technician |
 

@@ -4,10 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/auth";
-import { fail, type ActionError, type Failure, type Result } from "@/lib/result";
-import { mapRpcError } from "@/lib/rpc-error";
+import { formValues, guardRecord, rpcFailure, validationFailure } from "@/lib/action-helpers";
+import { fail, type FormState, type Result } from "@/lib/result";
 import { createClient } from "@/lib/supabase/server";
-import { isIsoDate, isUuid } from "@/lib/validation";
+import { isIsoDate } from "@/lib/validation";
 
 import { technicianDayLoad, type TechnicianJobSlot } from "./queries";
 import {
@@ -18,30 +18,7 @@ import {
   rescheduleSchema,
 } from "./schema";
 
-export type FormState = Failure | { ok: true; data: { message: string } } | null;
-
 const UNAUTHENTICATED = fail("UNAUTHENTICATED", "Your session has ended. Sign in again.");
-const UNKNOWN_ORDER = fail("NOT_FOUND", "Order not found.");
-
-function formValues(formData: FormData): Record<string, string> {
-  return Object.fromEntries([...formData.entries()].map(([key, value]) => [key, String(value)]));
-}
-
-function validationFailure(fields: Record<string, string>): Failure {
-  return {
-    ok: false,
-    error: { code: "VALIDATION", message: "Check the highlighted fields.", fields },
-  };
-}
-
-/** Maps a database error for the user and logs anything unexpected (api-spec §1). */
-function rpcFailure(rpc: string, error: { code?: string; message: string }): Failure {
-  const mapped: ActionError = mapRpcError(error);
-  if (mapped.code === "INTERNAL" || error.code === "42501" || error.code?.startsWith("23")) {
-    console.error(`RPC ${rpc} failed`, { code: error.code, message: error.message });
-  }
-  return { ok: false, error: mapped };
-}
 
 /** Technicians' open jobs on a Malaysia date, for the assignment picker. */
 export async function dayLoadAction(date: string): Promise<TechnicianJobSlot[]> {
@@ -94,10 +71,7 @@ async function runOrderRpc(
 }
 
 // The bound orderId comes from the browser, so it is checked like any other input.
-async function guard(orderId: unknown): Promise<Failure | null> {
-  if (!(await getCurrentUser())) return UNAUTHENTICATED;
-  return isUuid(orderId) ? null : UNKNOWN_ORDER;
-}
+const guard = (orderId: unknown) => guardRecord(orderId, "Order not found.");
 
 export async function updateOrderAction(
   orderId: string,
