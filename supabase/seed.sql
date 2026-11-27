@@ -1,0 +1,3 @@
+-- Demo seed data. Populated in Phase 1 (task 1.6): users, service types,
+-- ~6 weeks of orders in every status, flags and reschedules.
+-- Applied by `supabase start` / `supabase db reset` (config.jsonc → db.seed.sql_paths).
