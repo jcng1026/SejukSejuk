@@ -24,6 +24,10 @@ const RELATED: Record<string, string> = {
   "attachments:INSERT": "Uploaded a file",
   "flags:INSERT": "Raised a flag",
   "flags:UPDATE": "Resolved a flag",
+  "flags:DELETE": "Cleared an automatic flag for a fresh check",
+  "whatsapp_messages:INSERT": "Prepared the customer feedback message",
+  "whatsapp_messages:UPDATE": "Sent the feedback request on WhatsApp",
+  "whatsapp_messages:DELETE": "Replaced the customer feedback message",
 };
 
 function name(id: unknown, names: ReadonlyMap<string, string>): string {

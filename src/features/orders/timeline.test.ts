@@ -71,6 +71,9 @@ describe("describeAuditEntry", () => {
     expect(describeAuditEntry(entry({ tableName: "flags", action: "INSERT" }), names)).toBe(
       "Raised a flag",
     );
+    expect(
+      describeAuditEntry(entry({ tableName: "whatsapp_messages", action: "UPDATE" }), names),
+    ).toBe("Sent the feedback request on WhatsApp");
   });
 
   it("falls back to a generic edit description", () => {

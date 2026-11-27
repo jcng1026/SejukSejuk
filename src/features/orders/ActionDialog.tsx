@@ -19,6 +19,8 @@ type Action = (previous: FormState, formData: FormData) => Promise<FormState>;
 
 interface ActionDialogProps {
   triggerLabel: string;
+  /** Accessible name when several identical triggers share a page (e.g. "Send back ORD-…"). */
+  triggerAriaLabel?: string;
   title: string;
   description: string;
   submitLabel: string;
@@ -27,7 +29,13 @@ interface ActionDialogProps {
 }
 
 /** A dialog wrapping one Server Action form; closes itself when the action succeeds. */
-export function ActionDialog({ triggerLabel, title, description, ...form }: ActionDialogProps) {
+export function ActionDialog({
+  triggerLabel,
+  triggerAriaLabel,
+  title,
+  description,
+  ...form
+}: ActionDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   // A new key each time it opens gives the form fresh state, so old errors never reappear.
   const [openCount, setOpenCount] = useState(0);
@@ -40,7 +48,7 @@ export function ActionDialog({ triggerLabel, title, description, ...form }: Acti
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="rounded-full">
+        <Button variant="outline" className="rounded-full" aria-label={triggerAriaLabel}>
           {triggerLabel}
         </Button>
       </DialogTrigger>

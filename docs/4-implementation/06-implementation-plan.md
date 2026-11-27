@@ -37,11 +37,11 @@ Estimates are focused working hours (≈ 40 h of the 64 h window; the rest is bu
 ## Phase 3 — Flags, review, notifications (≈ 6 h) · branch `feat/flags-review-notify`
 | # | Task | Est |
 |---|---|---|
-| 3.1 | 🧪 Flag rule evaluation in SQL (thresholds from `app_config`), property tests on thresholds | 1.5 h |
+| 3.1 | 🧪 Flag rule evaluation in SQL (thresholds from `app_config`), boundary tests plus a property test on the over-quote rule | 1.5 h |
 | 3.2 | Manual raise / resolve flag UI; severity sorting; flags page | 1 h |
 | 3.3 | Review queue + approve / send back / close | 1 h |
 | 3.4 | 🧪 Job-done trigger → WhatsApp message + link; technician success screen; resend; `mark_whatsapp_sent` | 1 h |
-| 3.5 | Notification bell (Realtime), grouping, High-flag chime + job-done sound (UI SFX), per-user sound toggle | 1.5 h |
+| 3.5 | Notification bell (Realtime), grouping, High-flag chime + job-done sound (Web Audio tones, no files), per-user sound toggle | 1.5 h |
 
 ## Phase 4 — Home, KPIs, calendar, team (≈ 6 h) · branch `feat/insights`
 | # | Task | Est |

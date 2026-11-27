@@ -49,6 +49,11 @@ export const SEVERITY_DOT: Record<FlagSeverity, string> = {
   low: "bg-flag-low",
 };
 
+/** Sort key: High first, unflagged (null) last. */
+export function severityRank(severity: FlagSeverity | null): number {
+  return severity ? FLAG_SEVERITIES.indexOf(severity) : FLAG_SEVERITIES.length;
+}
+
 /** The most serious open flag, for one-glance row markers. */
 export function topOpenSeverity(
   flags: readonly { severity: FlagSeverity; status: string }[],

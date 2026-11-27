@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/features/auth/actions";
+import { NotificationBell } from "@/features/notifications/NotificationBell";
+import { SoundToggle } from "@/features/notifications/SoundToggle";
 import { requireUser } from "@/lib/auth";
 
 import { NavPills } from "./NavPills";
@@ -50,6 +52,8 @@ export async function StaffTopBar() {
             <Link href="/orders/new">+ New order</Link>
           </Button>
         )}
+        <NotificationBell userId={user.id} />
+        <SoundToggle initialEnabled={user.soundEnabled} />
         <span className="hidden text-sm text-muted-foreground lg:inline">
           {user.fullName} · <span className="capitalize">{user.role}</span>
         </span>
