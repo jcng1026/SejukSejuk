@@ -23,7 +23,8 @@ Every Server Action and the AI route return:
 ```ts
 type Result<T> =
   | { ok: true;  data: T }
-  | { ok: false; error: { code: ErrorCode; message: string; field?: string } };
+  | { ok: false; error: { code: ErrorCode; message: string; field?: string; fields?: Record<string, string> } };
+// `fields` carries one message per form field for VALIDATION errors.
 
 type ErrorCode =
   | 'VALIDATION' | 'UNAUTHENTICATED' | 'FORBIDDEN' | 'NOT_FOUND'
@@ -58,7 +59,7 @@ Argument names are `p_`-prefixed in SQL (`id` → `p_order_id`, `reason` → `p_
 | Function | Caller | Args | Effect / returns |
 |---|---|---|---|
 | `create_order` | admin | customer_name, customer_phone, customer_address, problem_description, service_type_id, quoted_sen, scheduled_at, technician_id?, admin_notes? | Inserts order (New or Assigned), returns `{id, order_no, status}` |
-| `update_order` | admin | id, patch (whitelisted fields), reason? | Allowed while New/Assigned; else requires `reason` (override) |
+| `update_order` | admin | id, customer_name, customer_phone, customer_address, problem_description, service_type_id, quoted_sen, admin_notes?, reason? | New/Assigned: free; In Progress: `reason` required (override); Job Done onwards: INVALID_TRANSITION. Technician and schedule change via their own RPCs |
 | `assign_order` | admin | id, technician_id, reason? | New→Assigned; reassign while Assigned, or override while In Progress (reason required for both) |
 | `reschedule_order` | admin | id, scheduled_at, reason | Updates time, `reschedule_count += 1` |
 | `start_job` | tech (assigned) / admin + reason | id, reason? | Assigned→In Progress, `started_at = now()` |
@@ -71,7 +72,7 @@ Argument names are `p_`-prefixed in SQL (`id` → `p_order_id`, `reason` → `p_
 | `set_technician_active` | manager | profile_id, active | Fails if deactivating with open jobs |
 | `set_sound_enabled` | any | enabled | Own profile |
 | `mark_notifications_read` | any | ids[] \| all | Own rows |
-| `technician_day_load` | admin | date | `[{technician_id, name, job_count, clashes[]}]` for assign picker |
+| ~~`technician_day_load`~~ | — | — | Not an RPC: a plain read under RLS (`technicianDayLoad` in `src/features/orders/queries.ts`); counts and clashes are computed client-side by `findClashes` |
 
 **Read RPCs used by AI tools** (also used by dashboard): `ai_jobs_list`, `ai_job_detail`, `ai_job_counts`, `ai_technician_leaderboard`, `ai_technician_workload`, `ai_flags_summary`, `ai_revenue_summary`. Each enforces role inside the function in addition to RLS and returns only the columns listed in §4.
 
@@ -109,7 +110,7 @@ How to read it: **Front-end call** is what the screen invokes. A *Server Compone
 |---|---|---|---|
 | Order list (search, filters, pages) | Server Component (URL search params) | `orders` query with filters, `range()` 25 per page | Admin, Manager |
 | New order form → service type dropdown | Server Component | `service_types` where `active` | Admin |
-| New order form → technician picker | Server Component (refetch on date change) | `technician_day_load(date)` | Admin |
+| New order form / Reassign dialog → technician picker | Server Component + `dayLoadAction` on date change | read of `orders` for the MYT day (RLS) | Admin |
 | New order form → Submit | `createOrder` action | `create_order` | Admin |
 | Post-submit summary → Notify technician | Link (no call) | `wa.me` link built from returned order | Admin |
 | Order detail (fields, flags, payment, timeline) | Server Component | `orders` + `completions` + `payments` + `flags` + `audit_log` for the order | Admin, Manager, assigned Technician |
