@@ -41,7 +41,7 @@ Status: Draft for approval · Priority: **M** Must, **S** Should, **C** Could (s
 | FR-ORD-6 | S | Technician picker shows each technician's job count that day and warns of clashes within ±2 h. | Warning shown, assignment still allowed. |
 | FR-ORD-7 | S | Admin summary offers "Notify technician on WhatsApp" deep link. | Opens `wa.me` with prefilled job details. |
 | FR-ORD-8 | M | Admin may edit order fields while New/Assigned; afterwards only via override with reason. | Edit after In Progress without override is rejected by the server. |
-| FR-ORD-9 | M | Admin may reassign while New/Assigned, reason required. | Reason stored in audit log. |
+| FR-ORD-9 | M | Admin may reassign while New/Assigned (reason required once assigned); while In Progress only as an override with a reason. | Reason stored in audit log; previous technician loses access. |
 | FR-ORD-10 | M | Admin may reschedule (`scheduled_at`), reason required; counted against the assigned technician. | KPI reschedule count increments. |
 | FR-ORD-11 | M | Order list: search (order no, name, phone), filters (status, technician, date range, has open flags), 25 per page, includes Closed. | |
 | FR-ORD-12 | M | Order detail shows fields, attachments, payment, flags, audit timeline. | |

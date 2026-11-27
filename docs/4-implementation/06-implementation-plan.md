@@ -18,10 +18,10 @@ Estimates are focused working hours (≈ 40 h of the 64 h window; the rest is bu
 |---|---|---|
 | 1.1 | Migrations: tables, enums, indexes per design §3 | 1.5 h |
 | 1.2 | 🧪 Order-number generator + `create_order` (concurrency test) | 1 h |
-| 1.3 | 🧪 State-machine guard trigger + transition RPCs (`assign`, `start`, `complete`, `review`, `close`, `reschedule`, `update`) | 2 h |
+| 1.3 | 🧪 State-machine guard trigger + transition RPCs (`assign`, `start`, `complete`, `review`, `close`, `reschedule`); also `set_technician_active` and `set_sound_enabled` (cheap, pulled forward). `update_order` moves to 2.4 with the form that uses it | 2 h |
 | 1.4 | 🧪 Audit trigger (reason/via via `set_config`) | 0.5 h |
 | 1.5 | 🧪 RLS policies + per-role RLS integration tests; storage bucket policies | 1.5 h |
-| 1.6 | Seed script: users (2 admins, 1 manager, 4 techs), service types, ~6 weeks of orders in every status incl. flags and reschedules; `reset-demo` script | 1 h |
+| 1.6 | Seed script: users (2 admins, 1 manager, 4 active techs + 1 deactivated to demo FR-AUTH-3), service types, ~6 weeks of orders in every status incl. flags and reschedules, backdated audit timelines; demo reset via `supabase db reset` (deployment guide) | 1 h |
 | 1.7 | Login page (A layout) + demo buttons + role-based redirect + deactivated check | 0.5 h |
 
 ## Phase 2 — Core workflow UI (≈ 9 h) · branch `feat/core-workflow`
@@ -32,7 +32,7 @@ Estimates are focused working hours (≈ 40 h of the 64 h window; the rest is bu
 | 2.3 | Order list (search, filters, pagination via URL state) + order detail (fields, attachments, flags, payment, audit timeline) | 2 h |
 | 2.4 | Edit / reassign / reschedule / override dialogs with reasons | 1 h |
 | 2.5 | Technician Today/Upcoming/History (E layout), Start job | 1 h |
-| 2.6 | 🧪 Final-amount maths; completion form; signed-URL uploads with compression, per-file retry, limits; payment fields; Mark job done | 2 h |
+| 2.6 | 🧪 Final-amount maths; completion form; signed-URL uploads with compression, per-file retry, limits; `register_attachment` RPC (bucket policies already in place); payment fields; Mark job done | 2 h |
 
 ## Phase 3 — Flags, review, notifications (≈ 6 h) · branch `feat/flags-review-notify`
 | # | Task | Est |

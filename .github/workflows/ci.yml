@@ -52,6 +52,9 @@ jobs:
             echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$PUBLISHABLE_KEY"
           } >> "$GITHUB_ENV"
 
+      - name: Database tests (RPCs, state machine, RLS, audit)
+        run: npm run test:db
+
       - run: npx playwright install --with-deps chromium
       - run: npm run build
       - run: npm run test:e2e

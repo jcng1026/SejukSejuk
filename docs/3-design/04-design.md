@@ -54,6 +54,7 @@ flowchart LR
 | Calendar | **FullCalendar (MIT standard build)** | Custom grid; react-big-calendar | Week/month views, resource-free event rendering, mature | Bundle weight (load on calendar route only) |
 | Charts | **Recharts** | Chart.js; Tremor | React-native API, good for small dashboards | SVG performance limits on very large series (not an issue here) |
 | API style | **RPC: Next.js Server Actions → Supabase RPC functions** (only `/api/ai/chat` is a plain HTTP endpoint) | REST resources + CRUD; REST + action endpoints (`POST /orders/{id}/start`); GraphQL | Workflow steps map 1:1 to named actions, each enforcing role + current state; multi-table steps (complete job) are one transaction; no layer that only forwards calls; typed calls and auto page refresh; smaller public attack surface | No public REST API for other clients or Postman; no OpenAPI/Swagger doc; RPC style less familiar to REST-minded reviewers. A REST layer can be added later on top of the same RPCs without moving the rules |
+| Caching / data freshness | **Next.js 16 Cache Components** (`cacheComponents: true`, opt-in `'use cache'`) + `revalidatePath` after writes + Supabase Realtime for other users' changes | TanStack Query; SWR; Next's older implicit fetch cache | Per-user, RLS-scoped reads render fresh on every request, so stale or leaked cached data isn't possible; no second client-side cache to keep in sync with Server Components; Realtime replaces polling | Every page hits the database on each request; opt-in caching must be added deliberately, and only for shared, rarely-changing data (`service_types`, `app_config`), never per-user data |
 | Validation | **Zod** shared client/server | Yup; manual | One schema for form, Server Action and AI tool args | — |
 | Testing | **Vitest** (unit), **pgTAP/SQL tests via Vitest + local Supabase** (RLS/RPC), **Playwright** (e2e) | Jest; Cypress | Fast, TypeScript-native; Playwright handles mobile viewports | Three tools to configure |
 
@@ -78,13 +79,13 @@ erDiagram
   profiles { uuid id PK "= auth.users.id" text full_name text role "admin|technician|manager" text phone bool is_active bool sound_enabled }
   service_types { int id PK text name bool active }
   orders { uuid id PK text order_no UK text status text customer_name text customer_phone "60XXXXXXXXX" text customer_address text problem_description int service_type_id FK int quoted_sen timestamptz scheduled_at uuid technician_id FK uuid created_by FK uuid assigned_by FK text admin_notes timestamptz started_at timestamptz completed_at timestamptz reviewed_at uuid reviewed_by timestamptz closed_at uuid closed_by int reschedule_count }
-  completions { uuid order_id PK text work_done int extra_sen ">= 0" int final_sen "quoted + extra (trigger)" text remarks uuid technician_id timestamptz completed_at "server time" }
+  completions { uuid order_id PK text work_done int extra_sen ">= 0" int final_sen "quoted + extra, set by complete_job" text remarks uuid technician_id timestamptz completed_at "server time" }
   attachments { uuid id PK uuid order_id FK text storage_path text mime int size_bytes uuid uploaded_by }
   payments { uuid id PK uuid order_id FK int amount_sen text method "cash|transfer|card|qr" text receipt_path uuid recorded_by timestamptz recorded_at }
   flags { uuid id PK uuid order_id FK text rule_code "null if manual" text severity "high|medium|low" text source "auto|manual" text message text status "open|resolved" uuid raised_by timestamptz raised_at uuid resolved_by timestamptz resolved_at text resolution_note }
   whatsapp_messages { uuid id PK uuid order_id FK text kind "feedback|tech_notify" text to_phone text body text link timestamptz sent_at uuid sent_by }
   notifications { uuid id PK uuid recipient_id FK uuid order_id FK text type text severity jsonb payload timestamptz read_at }
-  audit_log { bigint id PK text table_name uuid record_id text action uuid actor_id jsonb before jsonb after text reason text via "ui|ai|system" timestamptz created_at }
+  audit_log { bigint id PK text table_name uuid record_id uuid order_id "timeline key" text action uuid actor_id jsonb before jsonb after text reason text via "ui|ai|system" timestamptz created_at }
   app_config { text key PK jsonb value }
   ai_requests { bigint id PK uuid user_id text status jsonb tools_used timestamptz created_at }
   ai_blocked_log { bigint id PK uuid user_id text role text stage text reason text input timestamptz created_at }
@@ -105,6 +106,7 @@ stateDiagram-v2
   [*] --> Assigned: create_order (with technician)
   New --> Assigned: assign_order [admin]
   Assigned --> Assigned: assign_order (reassign, reason) [admin]
+  InProgress --> InProgress: assign_order (override, reason) [admin]
   Assigned --> InProgress: start_job [assigned tech | admin override + reason]
   InProgress --> JobDone: complete_job [assigned tech | admin override + reason]
   JobDone --> Reviewed: review_order(approve) [manager]
@@ -122,7 +124,7 @@ A `BEFORE UPDATE` trigger on `orders` rejects any transition not in this table, 
 
 ## 5. Security — RLS matrix
 
-Default deny on every table. `auth_role()` and `is_active()` helper functions read `profiles`.
+Default deny on every table. `private.current_app_role()` (SECURITY DEFINER) returns the caller's role, or NULL when signed out or deactivated; every policy builds on it. Technicians read their own profile and staff profiles only, not other technicians'.
 
 | Table | Admin | Technician | Manager |
 |---|---|---|---|
@@ -137,7 +139,7 @@ Default deny on every table. `auth_role()` and `is_active()` helper functions re
 | ai_blocked_log | — | — | read |
 | Storage `job-files` | read all | read/write `orders/{own order id}/…` | read all |
 
-RPC functions are `SECURITY INVOKER` where RLS suffices; the few that must write across tables (`complete_job`) are `SECURITY DEFINER` with an explicit role/ownership check as their first statement and a fixed `search_path`.
+The `authenticated` role has **SELECT only** on public tables (no INSERT/UPDATE/DELETE grants), so every write RPC is `SECURITY DEFINER` with `search_path = ''`, and its first statements check the caller's role (`private.require_role`), ownership (`private.require_job_actor`) and the order's state (`private.require_status`). Read-only RPCs stay `SECURITY INVOKER` so RLS applies. Helpers live in the non-exposed `private` schema. Deactivated users authenticate at the Auth layer but `private.current_app_role()` returns NULL for them, so every policy and RPC refuses them.
 
 ## 6. AI assistant design
 
