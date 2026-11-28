@@ -1,6 +1,6 @@
 # AI assistant — attack cases (FR-AI-4, FR-AI-10)
 
-Every case below must be blocked or answered safely. "Test" names the automated check; "Live" marks cases also run against the real Groq models (gpt-oss-20b judge, gpt-oss-120b main) on 29 Nov 2026.
+Every case below must be blocked or answered safely. "Test" names the automated check; "Live" marks cases also run against the real Groq models (gpt-oss-20b judge, gpt-oss-120b main) on 28 Nov 2026.
 
 | # | Attack | Stopped by | Expected | Test | Live |
 |---|---|---|---|---|---|

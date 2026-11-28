@@ -1,7 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
-import { axisFor, axisHours, DEFAULT_AXIS, nowPosition, placeJob } from "./timeline";
+import { axisFor, axisHours, DEFAULT_AXIS, nowPosition, placeJob, stackRows } from "./timeline";
 
 const at = (time: string) => `2026-11-27T${time}:00+08:00`;
 
@@ -53,5 +53,32 @@ describe("nowPosition", () => {
       (1 / 14) * 100,
     );
     expect(nowPosition(new Date(at("20:30")))).toBe(null);
+  });
+});
+
+describe("stackRows", () => {
+  it("keeps jobs that do not overlap on one row", () => {
+    expect(stackRows([at("08:00"), at("10:00"), at("12:00")])).toEqual([0, 0, 0]);
+  });
+
+  it("moves overlapping jobs to the next free row, so none hides another", () => {
+    expect(stackRows([at("09:00"), at("09:00"), at("10:00"), at("11:00")])).toEqual([0, 1, 2, 0]);
+  });
+
+  it("never gives two overlapping jobs the same row (any times)", () => {
+    fc.assert(
+      fc.property(fc.array(fc.integer({ min: 0, max: 23 * 60 }), { maxLength: 12 }), (minutes) => {
+        const times = minutes.map((m) =>
+          at(`${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`),
+        );
+        const rows = stackRows(times);
+        return times.every((a, i) =>
+          times.every((b, j) => {
+            if (i === j || rows[i] !== rows[j]) return true;
+            return Math.abs(Date.parse(a) - Date.parse(b)) >= 120 * 60_000;
+          }),
+        );
+      }),
+    );
   });
 });

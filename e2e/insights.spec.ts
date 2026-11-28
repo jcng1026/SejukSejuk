@@ -56,6 +56,8 @@ test("the calendar shows jobs in Malaysia time, filters by technician and opens 
   await demoSignIn(page, "manager Rahman");
   await page.goto("/calendar");
   await page.getByLabel("Technician").selectOption({ label: "Yusoff" });
+  // The list view shows every job in full (the grid folds crowded slots into "+N more").
+  await page.getByLabel("List view", { exact: true }).click();
   const event = page.getByRole("main").getByText(customer).first();
   await expect(event).toBeVisible();
   await expect(event.locator("xpath=ancestor::*[contains(., '10:00')][1]")).toBeVisible();

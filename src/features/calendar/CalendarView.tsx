@@ -2,11 +2,12 @@
 
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/react/daygrid";
+import listPlugin from "@fullcalendar/react/list";
 import classicThemePlugin from "@fullcalendar/react/themes/classic";
 import timeGridPlugin from "@fullcalendar/react/timegrid";
 import type { EventClickInfo, EventInput, EventSourceFuncInfo } from "@fullcalendar/react";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 
 import { Label } from "@/components/ui/label";
 import { StatusLegend } from "@/features/orders/badges";
@@ -22,6 +23,17 @@ import type { Result } from "@/lib/result";
 import type { CalendarJob } from "./types";
 
 const JOB_MINUTES = 120;
+/**
+ * Below this width a seven-day grid is too narrow to tap, so phones start on the
+ * list view: one full-width row per job (the WCAG 2.5.8 "equivalent control").
+ */
+const NARROW_QUERY = "(max-width: 767px)";
+
+function subscribeNarrow(onChange: () => void): () => void {
+  const query = window.matchMedia(NARROW_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
 const CARD_HEX = "#fffdf9";
 const INK_HEX = "#1f2a2a";
 
@@ -47,7 +59,7 @@ function toEvent(job: CalendarJob): EventInput {
     // surface and ink), not CSS variables.
     color: CARD_HEX,
     contrastColor: INK_HEX,
-    className: `!border-l-4 ${job.topFlag === "high" ? "!border-l-flag-high" : STATUS_BAR[job.status]}`,
+    className: `!min-h-6 !border-l-4 ${job.topFlag === "high" ? "!border-l-flag-high" : STATUS_BAR[job.status]}`,
     extendedProps: { orderNo: job.orderNo, status: STATUS_LABEL[job.status] },
   };
 }
@@ -57,6 +69,11 @@ export function CalendarView({ technicians }: { technicians: { id: string; name:
   const router = useRouter();
   const [technicianId, setTechnicianId] = useState("");
   const [error, setError] = useState("");
+  const isNarrow = useSyncExternalStore(
+    subscribeNarrow,
+    () => window.matchMedia(NARROW_QUERY).matches,
+    () => false,
+  );
 
   // A new function identity makes FullCalendar refetch when the filter changes.
   const loadEvents = useCallback(
@@ -114,18 +131,28 @@ export function CalendarView({ technicians }: { technicians: { id: string; name:
       <StatusLegend />
       <div className="rounded-2xl border bg-card p-3">
         <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, classicThemePlugin]}
-          initialView="timeGridWeek"
+          // Remount when the width class changes, so the starting view follows the screen.
+          key={isNarrow ? "narrow" : "wide"}
+          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, classicThemePlugin]}
+          initialView={isNarrow ? "listWeek" : "timeGridWeek"}
           timeZone="Asia/Kuala_Lumpur"
           firstDay={1}
+          // The button reads "Today"; its accessible name must say so too (WCAG 2.5.3).
+          todayHint="Today"
           headerToolbar={{
             start: "prev,next today",
             center: "title",
-            end: "timeGridDay,timeGridWeek,dayGridMonth",
+            end: "listWeek,timeGridDay,timeGridWeek,dayGridMonth",
           }}
           slotMinTime="07:00:00"
           slotMaxTime="21:00:00"
           allDaySlot={false}
+          // Keep every event at least 24 px tall and wide enough to tap (WCAG 2.5.8):
+          // at most two side by side, the rest behind a "+N more" link.
+          eventMaxStack={2}
+          eventMinHeight={24}
+          dayMaxEvents={3}
+          moreLinkClass="min-h-6 min-w-6"
           height="auto"
           events={loadEvents}
           eventClick={openOrder}

@@ -29,7 +29,7 @@ async function Team() {
               <span className="flex items-center gap-2 font-semibold">
                 {member.fullName}
                 {!member.isActive && (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-foreground">
                     Deactivated
                   </span>
                 )}

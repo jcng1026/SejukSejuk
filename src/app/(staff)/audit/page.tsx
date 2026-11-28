@@ -143,7 +143,12 @@ async function AuditTable({ filters }: { filters: AuditFilters }) {
       <h2 id="audit-results" className="text-sm text-muted-foreground">
         {total} change{total === 1 ? "" : "s"}, newest first · page {filters.page} of {pages}
       </h2>
-      <div className="overflow-x-auto rounded-2xl border bg-card">
+      <div
+        role="region"
+        aria-label="Audit log table"
+        tabIndex={0}
+        className="overflow-x-auto rounded-2xl border bg-card"
+      >
         <table className="w-full min-w-[48rem] text-left text-sm">
           <thead className="text-muted-foreground">
             <tr>

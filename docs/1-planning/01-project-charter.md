@@ -16,7 +16,7 @@ Digitise the service workflow **Order → Assignment → Service Completion → 
 1. An admin can create and assign an order in under 1 minute on desktop.
 2. A technician can start and complete a job in ≤ 3 screens on a 375px phone.
 3. Every status change and edit is recorded with actor and timestamp (100% trigger coverage on `orders`).
-4. Completed jobs are automatically checked against 5 flag rules at submission.
+4. Completed jobs are automatically checked against 6 flag rules at submission.
 5. Managers see weekly KPIs and can ask the AI assistant operational questions answered only from role-scoped, tool-retrieved data.
 6. Live demo on Vercel + public GitHub repo with SDLC docs and README.
 

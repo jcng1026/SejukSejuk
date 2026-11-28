@@ -38,7 +38,12 @@ async function BlockedRequests() {
     );
   }
   return (
-    <div className="overflow-x-auto rounded-2xl border bg-card">
+    <div
+      role="region"
+      aria-label="Blocked requests table"
+      tabIndex={0}
+      className="overflow-x-auto rounded-2xl border bg-card"
+    >
       <table className="w-full min-w-[48rem] text-left text-sm">
         <thead className="text-muted-foreground">
           <tr>

@@ -45,7 +45,7 @@ function Tile({
 }) {
   return (
     <div className={`flex flex-col gap-1 rounded-2xl border bg-card p-4 ${className}`}>
-      <span className="text-sm opacity-80">{label}</span>
+      <span className="text-sm">{label}</span>
       <span className="font-heading text-3xl font-extrabold tabular-nums">{children}</span>
     </div>
   );

@@ -5,7 +5,10 @@ import type { OrderStatus } from "@/features/orders/labels";
 import { mytParts } from "@/features/orders/schedule";
 
 import type { ScheduledJob } from "./queries";
-import { axisFor, axisHours, nowPosition, placeJob, type Axis } from "./timeline";
+import { axisFor, axisHours, nowPosition, placeJob, stackRows, type Axis } from "./timeline";
+
+/** Each stacked row of a lane, in px: a 32 px block plus 8 px of space (WCAG 2.5.8 target size). */
+const ROW_PX = 40;
 
 const STATUS_BORDER: Record<OrderStatus, string> = {
   new: "border-status-new",
@@ -16,7 +19,7 @@ const STATUS_BORDER: Record<OrderStatus, string> = {
   closed: "border-status-closed",
 };
 
-function JobBlock({ job, axis }: { job: ScheduledJob; axis: Axis }) {
+function JobBlock({ job, axis, row }: { job: ScheduledJob; axis: Axis; row: number }) {
   const { leftPct, widthPct } = placeJob(job.scheduledAt, axis);
   if (widthPct === 0) return null;
   const border = job.topFlag === "high" ? "border-flag-high" : STATUS_BORDER[job.status];
@@ -24,8 +27,13 @@ function JobBlock({ job, axis }: { job: ScheduledJob; axis: Axis }) {
     <Link
       href={`/orders/${job.id}`}
       title={`${job.orderNo} · ${job.customerName} · ${mytParts(job.scheduledAt).time}`}
-      style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
-      className={`absolute inset-y-1 flex items-center gap-1 overflow-hidden rounded-lg border-l-4 bg-card px-2 text-xs font-semibold whitespace-nowrap shadow-sm hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${border}`}
+      style={{
+        left: `${leftPct}%`,
+        width: `${widthPct}%`,
+        top: row * ROW_PX + 4,
+        height: ROW_PX - 8,
+      }}
+      className={`absolute flex items-center gap-1 overflow-hidden rounded-lg border-l-4 bg-card px-2 text-xs font-semibold whitespace-nowrap shadow-sm hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${border}`}
     >
       {job.topFlag === "high" && (
         <span aria-label="High flag" className="text-flag-high">
@@ -40,13 +48,16 @@ function JobBlock({ job, axis }: { job: ScheduledJob; axis: Axis }) {
 }
 
 function Lane({ label, jobs, now, axis, hatched = false }: LaneProps) {
+  const rows = stackRows(jobs.map((job) => job.scheduledAt));
+  const rowCount = Math.max(1, ...rows.map((row) => row + 1));
   return (
     <>
       <span className="truncate pt-2.5 text-sm font-semibold">{label}</span>
       <div
         role="list"
         aria-label={`${label}: ${jobs.length} job${jobs.length === 1 ? "" : "s"}`}
-        className={`relative h-10 rounded-xl ${hatched ? "bg-[repeating-linear-gradient(45deg,var(--background)_0_8px,var(--sand)_8px_16px)]" : "bg-background"}`}
+        style={{ height: rowCount * ROW_PX }}
+        className={`relative rounded-xl ${hatched ? "bg-[repeating-linear-gradient(45deg,var(--background)_0_8px,var(--sand)_8px_16px)]" : "bg-background"}`}
       >
         {now !== null && (
           <div
@@ -55,9 +66,9 @@ function Lane({ label, jobs, now, axis, hatched = false }: LaneProps) {
             style={{ left: `${now}%` }}
           />
         )}
-        {jobs.map((job) => (
+        {jobs.map((job, index) => (
           <div role="listitem" key={job.id}>
-            <JobBlock job={job} axis={axis} />
+            <JobBlock job={job} axis={axis} row={rows[index]} />
           </div>
         ))}
       </div>
