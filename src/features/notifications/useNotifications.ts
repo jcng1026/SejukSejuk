@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { createClient } from "@/lib/supabase/client";
+import { subscribeAsUser } from "@/lib/supabase/realtime";
 
 import { toNotice, type Notice, type NotificationRow } from "./notice";
 import { playSound } from "./sound";
@@ -51,22 +52,13 @@ export function useNotifications(userId: string) {
       },
     );
 
-    async function connect() {
-      // The cookie session reaches Realtime asynchronously; without the user's
-      // token the channel joins as anon and RLS hides every row.
-      const { data, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !data.session) throw new Error("No session for live updates");
-      await supabase.realtime.setAuth(data.session.access_token);
-      if (!isActive) return;
-      channel.subscribe((status) => {
-        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") setError(LIVE_ERROR);
-      });
-    }
-
     void load();
-    connect().catch(() => {
-      if (isActive) setError(LIVE_ERROR);
-    });
+    void subscribeAsUser(
+      supabase,
+      channel,
+      () => setError(LIVE_ERROR),
+      () => isActive,
+    );
 
     return () => {
       isActive = false;

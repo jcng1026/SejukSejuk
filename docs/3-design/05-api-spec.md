@@ -87,7 +87,7 @@ File uploads: the browser uploads directly to Storage with the user's session (p
 
 ## 3a. Screen-to-backend map
 
-How to read it: **Front-end call** is what the screen invokes. A *Server Component* loads data while the page renders (a direct Supabase query as the signed-in user, so RLS applies). An *action* is a Next.js Server Action — not a public URL. **Backend** is the RPC, table query, Storage call or channel that does the work. The only public HTTP endpoint is `/api/ai/chat`.
+How to read it: **Front-end call** is what the screen invokes. A *Server Component* loads data while the page renders (a direct Supabase query as the signed-in user, so RLS applies). An *action* is a Next.js Server Action — not a public URL. **Backend** is the RPC, table query, Storage call or channel that does the work. The only public HTTP endpoints are `/api/ai/chat` and the read-only `GET /api/calendar` (FullCalendar fetches events while it renders, which a Server Action cannot serve).
 
 ### Sign-in
 | Screen / control | Front-end call | Backend | Role |
@@ -100,10 +100,10 @@ How to read it: **Front-end call** is what the screen invokes. A *Server Compone
 ### Admin / Manager — home (C2 schedule bento)
 | Screen / control | Front-end call | Backend | Role |
 |---|---|---|---|
-| KPI tiles | Server Component | `kpi_summary(date_range)` | Admin, Manager |
+| KPI tiles | Server Component | `orders` counts for today; `kpi_summary(p_from, p_to)` for week revenue | Admin, Manager |
 | Flags-by-severity bar | Server Component | `flags` count by severity where `status = open` | Admin, Manager |
-| Technician × hour schedule | Server Component + Realtime | `orders` where `scheduled_at` is today, joined to `profiles`; `orders` channel | Admin, Manager |
-| Review queue tile | Server Component + Realtime | `orders` where `status = job_done`, ordered by worst open flag | Admin, Manager |
+| Technician × hour schedule | Server Component + Realtime refresh | `orders` where `scheduled_at` is today; one lane per active technician (plus any deactivated one with a job today) and an Unassigned lane; axis 08:00–20:00, widened to fit earlier/later jobs; each job drawn as a 2 h block; `orders` channel triggers a page refresh | Admin, Manager |
+| Review queue tile | Server Component + Realtime refresh | `orders` where `status = job_done`, worst open flag first, showing that flag's message | Admin, Manager |
 
 ### Orders
 | Screen / control | Front-end call | Backend | Role |
@@ -145,10 +145,10 @@ How to read it: **Front-end call** is what the screen invokes. A *Server Compone
 | Screen / control | Front-end call | Backend | Role |
 |---|---|---|---|
 | Dashboard cards, leaderboard, charts | Server Component (period in URL) | `kpi_summary`, `kpi_leaderboard`, `kpi_jobs_per_day`, `kpi_service_mix` | Admin, Manager |
-| Calendar (week / month, technician filter) | `getCalendarEvents(range, technician?)` action | `orders` in date range | Admin, Manager |
-| Technicians page | Server Component | `profiles` where `role = technician` + open job counts | Manager |
+| Calendar (day / week / month, technician filter) | `GET /api/calendar?start&end&technician` (≤ 45 days, staff only) | `orders` in date range, shown in Malaysia time | Admin, Manager |
+| Technicians page | Server Component | `profiles` where `role = technician` + open job counts | Manager acts; Admin views |
 | Deactivate / reactivate | `setTechnicianActive` action | `set_technician_active` | Manager |
-| Audit log page | Server Component | `audit_log` with filters, paged | Admin, Manager |
+| Audit log page | Server Component | `audit_log` filtered by record type, change, actor, channel (app/AI/system), order number and MYT date range; 50 per page, newest first | Admin, Manager |
 | Blocked AI requests page | Server Component | `ai_blocked_log`, paged | Manager |
 
 ### Shared (every screen)
@@ -160,7 +160,7 @@ How to read it: **Front-end call** is what the screen invokes. A *Server Compone
 | AI button → chat panel | `fetch('POST /api/ai/chat')` | Guardrail pipeline → `ai_*` read RPCs + Groq | All |
 | AI bulk-review card → Confirm (stretch) | `reviewOrder` action per order, `via = ai` | `review_order` | Manager |
 
-New read functions introduced by this map: `kpi_summary`, `kpi_leaderboard`, `kpi_jobs_per_day`, `kpi_service_mix` — `SECURITY INVOKER`, MYT date bucketing, Admin/Manager only.
+New read functions introduced by this map: `kpi_summary`, `kpi_leaderboard`, `kpi_jobs_per_day`, `kpi_service_mix`, each `(p_from date, p_to date)` with inclusive Malaysia dates (≤ 366 days) — `SECURITY INVOKER` (RLS applies) plus an explicit Admin/Manager check. A job counts on the MYT day it was completed while it is Job Done, Reviewed or Closed. `open_flags` is the current count, not tied to the period. Leaderboard: reschedules go to the technician the job was with at the time; flags to the technician who completed the job (else the one assigned); technicians deactivated since still appear for periods they worked in.
 
 ## 4. AI route — `POST /api/ai/chat`
 
@@ -218,7 +218,7 @@ Anything else → block (`stage: "intent"`).
 Notification rows: `type = 'flag'` (`severity = 'high'`, payload `{order_no, message}`, one per High-flagged job) or `type = 'jobs_done'` (payload `{count}`, one row per recipient per MYT day, count incremented and marked unread on each clean completion).
 
 Automatic flag `rule_code`s: `over_quote` (High, final > quote + 20%), `extras_without_remarks` (High), `underpaid` (High, payment recorded below final), `no_attachments` (Medium), `over_quote_explained` (Low, extra ≤ 20% with remarks), `late_completion` (Low, > 24 h after schedule). Thresholds come from `app_config` (`flag.over_quote_pct`, `flag.late_hours`).
-| `orders` (UPDATE) | admin/manager only | Home schedule and review queue refresh |
+| `orders` (INSERT/UPDATE) | RLS-filtered (staff see all) | Home schedule and review queue refresh (debounced page refresh) |
 
 ## 6. WhatsApp deep link format
 ```

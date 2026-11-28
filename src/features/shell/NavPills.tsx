@@ -8,12 +8,16 @@ const LINKS = [
   { href: "/orders", label: "Orders" },
   { href: "/review", label: "Review" },
   { href: "/flags", label: "Flags" },
+  { href: "/calendar", label: "Calendar" },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/team", label: "Team" },
+  { href: "/audit", label: "Audit" },
 ] as const;
 
 export function NavPills() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Main" className="flex gap-1 rounded-full bg-background p-1">
+    <nav aria-label="Main" className="flex flex-wrap gap-1 rounded-full bg-background p-1">
       {LINKS.map((link) => {
         const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
         return (

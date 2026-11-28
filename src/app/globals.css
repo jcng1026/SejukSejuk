@@ -89,7 +89,8 @@
   --border: #e7ded2;
   --input: #e7ded2;
   --ring: #0f766e;
-  --chart-1: #0f766e;
+  /* Teal-600: passes the dataviz chroma floor on the #FFFDF9 surface (the brand #0F766E reads grey). */
+  --chart-1: #0d9488;
   --chart-2: #0ea5e9;
   --chart-3: #7c3aed;
   --chart-4: #ea580c;

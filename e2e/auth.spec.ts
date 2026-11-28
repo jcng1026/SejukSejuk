@@ -24,7 +24,10 @@ test("login page uses palette C", async ({ page }) => {
 test("admin demo sign-in lands on the staff home and can sign out", async ({ page }) => {
   await demoSignIn(page, "admin Aisyah");
   await expect(page).toHaveURL(/\/home$/);
-  await expect(page.getByRole("heading", { name: "Hi Aisyah" })).toBeVisible();
+  // The C2 home greets by time of day in Malaysia.
+  await expect(
+    page.getByRole("heading", { name: /^(Morning|Afternoon|Evening), Aisyah$/ }),
+  ).toBeVisible();
 
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/login$/);

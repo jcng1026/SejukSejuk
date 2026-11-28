@@ -1,4 +1,5 @@
 import {
+  ORDER_STATUSES,
   SEVERITY_CHIP,
   SEVERITY_DOT,
   SEVERITY_LABEL,
@@ -7,6 +8,24 @@ import {
   type FlagSeverity,
   type OrderStatus,
 } from "./labels";
+
+/** Colour key for every status plus the High-flag colour (schedule and calendar). */
+export function StatusLegend() {
+  return (
+    <ul className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+      {ORDER_STATUSES.map((status) => (
+        <li key={status} className="flex items-center gap-1.5">
+          <span aria-hidden="true" className={`size-2 rounded-full ${STATUS_DOT[status]}`} />
+          {STATUS_LABEL[status]}
+        </li>
+      ))}
+      <li className="flex items-center gap-1.5">
+        <span aria-hidden="true" className="size-2 rounded-full bg-flag-high" />
+        High flag
+      </li>
+    </ul>
+  );
+}
 
 export function StatusBadge({ status }: { status: OrderStatus }) {
   return (

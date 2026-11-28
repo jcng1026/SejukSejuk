@@ -1,6 +1,7 @@
 // All scheduling is in Malaysia time (UTC+8, no daylight saving).
 
 const MYT_OFFSET_MINUTES = 8 * 60;
+export const DAY_MS = 86_400_000;
 const CLASH_WINDOW_MINUTES = 120;
 
 /** Half-hour slots offered in the order form, 08:00–18:00. */

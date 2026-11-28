@@ -7,6 +7,16 @@ import { createClient } from "@/lib/supabase/server";
 // Fetch the whole queue so the flag-first sort is right across it (seed has ~120).
 const QUEUE_LIMIT = 500;
 
+type OpenFlagRow = { severity: FlagSeverity; status: string; message: string };
+
+function topFlagOf(flags: OpenFlagRow[]): Pick<ReviewItem, "topFlag" | "topFlagMessage"> {
+  const topFlag = topOpenSeverity(flags);
+  const message = flags.find(
+    (flag) => flag.status === "open" && flag.severity === topFlag,
+  )?.message;
+  return { topFlag, topFlagMessage: message ?? null };
+}
+
 export interface ReviewItem {
   id: string;
   orderNo: string;
@@ -16,6 +26,8 @@ export interface ReviewItem {
   paidSen: number;
   completedAt: string;
   topFlag: FlagSeverity | null;
+  /** The most serious open flag's message, e.g. "Payment RM 80.00 short". */
+  topFlagMessage: string | null;
 }
 
 export interface ReviewList {
@@ -31,7 +43,7 @@ async function loadByStatus(status: "job_done" | "reviewed"): Promise<ReviewList
     .select(
       `id, order_no, customer_name, completed_at,
        technician:profiles!orders_technician_id_fkey(full_name),
-       completions(final_sen), payments(amount_sen), flags(severity, status)`,
+       completions(final_sen), payments(amount_sen), flags(severity, status, message)`,
       { count: "exact" },
     )
     .eq("status", status)
@@ -46,7 +58,7 @@ async function loadByStatus(status: "job_done" | "reviewed"): Promise<ReviewList
     finalSen: firstOf(row.completions)?.final_sen ?? 0,
     paidSen: (row.payments ?? []).reduce((sum, payment) => sum + payment.amount_sen, 0),
     completedAt: row.completed_at as string,
-    topFlag: topOpenSeverity((row.flags ?? []) as { severity: FlagSeverity; status: string }[]),
+    ...topFlagOf((row.flags ?? []) as OpenFlagRow[]),
   }));
   return { items, total: count ?? items.length };
 }
