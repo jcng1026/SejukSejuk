@@ -6,6 +6,7 @@ const OUR_CODES: readonly ErrorCode[] = [
   "NOT_FOUND",
   "INVALID_TRANSITION",
   "CONFLICT",
+  "RATE_LIMITED",
 ];
 
 interface DbError {

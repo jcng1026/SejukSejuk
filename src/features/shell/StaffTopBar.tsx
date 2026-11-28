@@ -33,7 +33,7 @@ export async function StaffTopBar() {
   return (
     <header className="flex min-h-16 flex-wrap items-center gap-x-6 gap-y-2 border-b bg-card px-4 py-3 md:px-6">
       <Brand />
-      <NavPills />
+      <NavPills isManager={user.role === "manager"} />
       <form action="/orders" method="get" role="search" className="ml-auto">
         <label htmlFor="topbar-search" className="sr-only">
           Search orders

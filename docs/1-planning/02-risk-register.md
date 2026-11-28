@@ -6,7 +6,7 @@ Scale: Likelihood (L) and Impact (I) 1–3. Score = L × I. Reviewed at each mil
 |---|---|---|---|---|---|---|
 | R1 | Scope exceeds 64 hours | 3 | 3 | 9 | Tiered scope; stretch items only after Core + Tier 2 pass; cut list in implementation plan | Dev |
 | R2 | Prompt injection (direct or via stored free text) makes AI leak data or misbehave | 2 | 3 | 6 | 6-stage guardrail pipeline; free text excluded from tool results; read-only role-scoped tools under RLS; output screen; fail closed | Dev |
-| R3 | Groq free-tier limits (8K TPM, 1K RPD) or outage break the AI demo | 2 | 2 | 4 | ≤5 tools per role, ≤3 history turns, per-user rate limit; fail closed with clear message; Gemini documented as manual fallback | Dev |
+| R3 | Groq free-tier limits (8K TPM, 1K RPD) or outage break the AI demo | 2 | 2 | 4 | Small role tool sets (4 technician, 6 admin, 7 manager), ≤3 history turns, low reasoning effort and capped tokens, 20 questions per user per hour, 45 s request deadline; fail closed with "Assistant unavailable" (no automatic fallback provider) | Dev |
 | R4 | RLS misconfiguration exposes other users' data | 2 | 3 | 6 | RLS on every table, default deny; RLS integration tests per role in CI | Dev |
 | R5 | Supabase free storage (1 GB / 50 MB per file) exceeded by uploads | 2 | 2 | 4 | 10 MB image/PDF and 50 MB video caps; browser photo compression; seed uses tiny placeholders | Dev |
 | R6 | Free hosted Supabase project pauses after inactivity before review | 2 | 3 | 6 | Note in deployment guide; check and resume before submission; reset script restores demo | Dev |

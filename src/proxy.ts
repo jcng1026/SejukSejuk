@@ -1,4 +1,4 @@
-import type { NextRequest, NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { isProtectedPath, LOGIN_PATH, STAFF_HOME } from "@/lib/routes";
 import { redirectKeepingSession, updateSession } from "@/lib/supabase/proxy";
@@ -12,6 +12,13 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
   if (pathname === "/") {
     return redirectKeepingSession(request, session, session.userId ? STAFF_HOME : LOGIN_PATH);
+  }
+  // API callers get the api-spec's 401 envelope, not a login page.
+  if (!session.userId && pathname.startsWith("/api/")) {
+    return NextResponse.json(
+      { ok: false, error: { code: "UNAUTHENTICATED", message: "Sign in first." } },
+      { status: 401 },
+    );
   }
   if (!session.userId && isProtectedPath(pathname)) {
     return redirectKeepingSession(request, session, LOGIN_PATH);
