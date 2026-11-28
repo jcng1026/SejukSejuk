@@ -17,7 +17,7 @@ Live: https://sejuk-sejuk-roan.vercel.app · Database: hosted Supabase `sejuk-de
 
 ## Database migrations (in order)
 
-`20261127000100`–`000600` schema, RLS, audit and state machine, workflow RPCs, storage bucket and upload policy, function privileges · `20261128000100` update order · `000200` attachments · `000300` Job Done effects · `000400` flags/messages RPCs · `000500` KPI functions · `20261129000100` AI tools.
+`20261127000100`–`000600` schema, RLS, audit and state machine, workflow RPCs, storage bucket and upload policy, function privileges · `20261128000100` update order · `000200` attachments · `000300` Job Done effects · `000400` flags/messages RPCs · `000500` KPI functions · `20261129000100` AI tools · `20261130000100` KPI functions repair (idempotent; fixes a hosted copy of `000500` applied from an early draft).
 
 ## Known limitations
 
