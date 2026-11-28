@@ -38,8 +38,8 @@ export const SEVERITY_LABEL: Record<FlagSeverity, string> = {
 };
 
 export const SEVERITY_CHIP: Record<FlagSeverity, string> = {
-  high: "bg-flag-high-soft text-flag-high",
-  medium: "bg-flag-medium-soft text-flag-medium",
+  high: "bg-flag-high-soft text-flag-high-foreground",
+  medium: "bg-flag-medium-soft text-flag-medium-foreground",
   low: "bg-flag-low-soft text-flag-low-foreground",
 };
 

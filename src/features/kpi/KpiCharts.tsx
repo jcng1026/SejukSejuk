@@ -73,7 +73,11 @@ export function JobsPerDayChart({ data }: { data: { day: string; jobs: number }[
   return (
     <ChartCard title="Jobs completed per day" labelHeading="Day" table={rows}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
+        <BarChart
+          data={rows}
+          accessibilityLayer={false}
+          margin={{ top: 8, right: 8, bottom: 0, left: -16 }}
+        >
           <CartesianGrid vertical={false} stroke={GRID} />
           <XAxis dataKey="label" tick={TICK} tickLine={false} axisLine={{ stroke: GRID }} />
           <YAxis allowDecimals={false} tick={TICK} tickLine={false} axisLine={false} />
@@ -96,7 +100,12 @@ export function ServiceMixChart({ data }: { data: { service: string; jobs: numbe
   return (
     <ChartCard title="Jobs by service" labelHeading="Service" table={rows}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={rows} layout="vertical" margin={{ top: 0, right: 16, bottom: 0, left: 0 }}>
+        <BarChart
+          data={rows}
+          layout="vertical"
+          accessibilityLayer={false}
+          margin={{ top: 0, right: 16, bottom: 0, left: 0 }}
+        >
           <CartesianGrid horizontal={false} stroke={GRID} />
           <XAxis
             type="number"

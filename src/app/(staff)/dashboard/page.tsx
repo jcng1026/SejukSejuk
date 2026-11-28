@@ -102,7 +102,7 @@ async function Dashboard({
         <h2 id="leaderboard-heading" className="mb-3 text-lg">
           Technician leaderboard
         </h2>
-        <div className="overflow-x-auto">
+        <div role="region" aria-label="Leaderboard table" tabIndex={0} className="overflow-x-auto">
           <table className="w-full min-w-[36rem] text-left text-sm">
             <thead className="text-muted-foreground">
               <tr>

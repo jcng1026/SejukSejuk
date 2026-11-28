@@ -57,3 +57,22 @@ export function nowPosition(now: Date, axis: Axis = DEFAULT_AXIS): number | null
     ? null
     : toPct(minutes, axis);
 }
+
+/**
+ * A row for each job (in the order given) so that jobs whose two-hour blocks
+ * overlap never share a row and never hide each other.
+ */
+export function stackRows(scheduledAts: readonly string[]): number[] {
+  const order = scheduledAts
+    .map((iso, index) => ({ index, start: Date.parse(iso) }))
+    .toSorted((a, b) => a.start - b.start);
+  const rowEnds: number[] = [];
+  const rows = new Array<number>(scheduledAts.length);
+  for (const { index, start } of order) {
+    const free = rowEnds.findIndex((end) => end <= start);
+    const row = free === -1 ? rowEnds.length : free;
+    rowEnds[row] = start + JOB_BLOCK_MINUTES * 60_000;
+    rows[index] = row;
+  }
+  return rows;
+}

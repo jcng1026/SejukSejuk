@@ -7,13 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { demoSignIn, signIn, type SignInState } from "@/features/auth/actions";
 
+// Role on top, name below: the visible text reads in the same order as the
+// button's accessible name, "Sign in as technician Ali" (WCAG 2.5.3).
 const DEMO_BUTTONS = [
-  { key: "aisyah", label: "Admin", hint: "Aisyah", spoken: "admin Aisyah" },
-  { key: "rahman", label: "Manager", hint: "Rahman", spoken: "manager Rahman" },
-  { key: "ali", label: "Ali", hint: "Technician", spoken: "technician Ali" },
-  { key: "john", label: "John", hint: "Technician", spoken: "technician John" },
-  { key: "bala", label: "Bala", hint: "Technician", spoken: "technician Bala" },
-  { key: "yusoff", label: "Yusoff", hint: "Technician", spoken: "technician Yusoff" },
+  { key: "aisyah", role: "Admin", name: "Aisyah" },
+  { key: "rahman", role: "Manager", name: "Rahman" },
+  { key: "ali", role: "Technician", name: "Ali" },
+  { key: "john", role: "Technician", name: "John" },
+  { key: "bala", role: "Technician", name: "Bala" },
+  { key: "yusoff", role: "Technician", name: "Yusoff" },
 ] as const;
 
 const INITIAL: SignInState = null;
@@ -69,10 +71,10 @@ export function LoginForm() {
               value={demo.key}
               variant="outline"
               className="h-auto flex-col gap-0 rounded-2xl py-2"
-              aria-label={`Sign in as ${demo.spoken}`}
+              aria-label={`Sign in as ${demo.role.toLowerCase()} ${demo.name}`}
             >
-              <span className="font-semibold">{demo.label}</span>
-              <span className="text-xs font-normal text-muted-foreground">{demo.hint}</span>
+              <span className="text-xs font-normal text-muted-foreground">{demo.role}</span>{" "}
+              <span className="font-semibold">{demo.name}</span>
             </Button>
           ))}
         </div>

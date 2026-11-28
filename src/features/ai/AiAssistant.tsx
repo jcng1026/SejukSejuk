@@ -75,7 +75,7 @@ export function AiAssistant({
   isAboveTabs = false,
 }: {
   role: Role;
-  /** The technician screens have a bottom tab bar; keep the button clear of it. */
+  /** Technician screens have a bottom tab bar and a pinned main action above it; keep the button clear of both. */
   isAboveTabs?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -140,7 +140,7 @@ export function AiAssistant({
           role="dialog"
           aria-label="AI assistant"
           onKeyDown={(event) => event.key === "Escape" && setIsOpen(false)}
-          className={`fixed right-4 ${isAboveTabs ? "bottom-40" : "bottom-24"} z-40 flex max-h-[min(36rem,calc(100dvh-8rem))] w-[min(24rem,calc(100vw-2rem))] flex-col rounded-2xl border bg-card shadow-xl`}
+          className={`fixed right-4 ${isAboveTabs ? "bottom-60" : "bottom-24"} z-40 flex max-h-[min(36rem,calc(100dvh-8rem))] w-[min(24rem,calc(100vw-2rem))] flex-col rounded-2xl border bg-card shadow-xl`}
         >
           <header className="flex items-center justify-between border-b px-4 py-3">
             <h2 className="text-base font-semibold">Ask about your operations</h2>
@@ -221,7 +221,7 @@ export function AiAssistant({
         aria-label={isOpen ? "Close AI assistant" : "Ask AI"}
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
-        className={`fixed right-4 ${isAboveTabs ? "bottom-20" : "bottom-4"} z-40 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:brightness-110 focus-visible:ring-4 focus-visible:ring-ring/50 focus-visible:outline-none`}
+        className={`fixed right-4 ${isAboveTabs ? "bottom-40" : "bottom-4"} z-40 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:brightness-110 focus-visible:ring-4 focus-visible:ring-ring/50 focus-visible:outline-none`}
       >
         <SparkleIcon />
       </button>

@@ -49,7 +49,7 @@ export function TechnicianPicker({
         // One always-mounted live region, so changes in its text are announced.
         <span
           role="status"
-          className={clashes.length > 0 ? "font-medium text-flag-medium" : undefined}
+          className={clashes.length > 0 ? "font-medium text-flag-medium-foreground" : undefined}
         >
           {status}
         </span>

@@ -1,6 +1,6 @@
 # 10 · Deployment Guide
 
-Status: living document — finalised in Phase 6.
+Status: final for v1.0. Day-to-day operations: [13 Ops runbook](../7-maintenance/13-ops-runbook.md).
 
 ## Environments
 
@@ -32,13 +32,13 @@ Schema lives in `supabase/migrations/` (timestamped SQL, applied in order).
 ```powershell
 npm run db:reset          # local: rebuild from migrations + seed
 npm run test:db           # local: RPC / RLS / audit tests
-npx supabase db push      # hosted: apply new migrations (project is linked)
+npx supabase db push --remote   # hosted: apply new migrations (CLI 3.x needs --remote)
 ```
 
 Seeding the hosted demo (destructive — wipes and reloads demo data):
 
 ```powershell
-npx supabase db reset --linked
+npx supabase db reset --remote
 ```
 
 Never run `supabase config push`: it would copy the local `site_url` (`127.0.0.1`) over the hosted one.

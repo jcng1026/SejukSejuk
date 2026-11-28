@@ -33,8 +33,10 @@
   --color-sand: var(--sand);
   --color-flag-high: var(--flag-high);
   --color-flag-high-soft: var(--flag-high-soft);
+  --color-flag-high-foreground: var(--flag-high-foreground);
   --color-flag-medium: var(--flag-medium);
   --color-flag-medium-soft: var(--flag-medium-soft);
+  --color-flag-medium-foreground: var(--flag-medium-foreground);
   --color-flag-low: var(--flag-low);
   --color-flag-low-foreground: var(--flag-low-foreground);
   --color-flag-low-soft: var(--flag-low-soft);
@@ -102,8 +104,10 @@
 
   --flag-high: #dc2626;
   --flag-high-soft: #fee2e2;
+  --flag-high-foreground: #b91c1c; /* text on --flag-high-soft: 5.3:1 (#dc2626 is 3.95:1) */
   --flag-medium: #ea580c;
   --flag-medium-soft: #ffedd5;
+  --flag-medium-foreground: #9a3412; /* text on --flag-medium-soft: 6.4:1 (#ea580c is 3.1:1) */
   --flag-low: #ca8a04; /* indicator (dots, bars) — design §8 */
   --flag-low-foreground: #a16207; /* text on --flag-low-soft: #ca8a04 fails WCAG AA there */
   --flag-low-soft: #fef9c3;
