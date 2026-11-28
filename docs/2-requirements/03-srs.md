@@ -104,7 +104,7 @@ Status: Draft for approval · Priority: **M** Must, **S** Should, **C** Could (s
 | FR-AI-1 | M | Floating round AI button bottom-right on every screen opens a chat panel, all roles. | |
 | FR-AI-2 | M | Answers come only from whitelisted, read-only, parameterised tools executed under the user's session (RLS). | No free-form SQL path exists. |
 | FR-AI-3 | M | Role tool sets: technician (own jobs/stats), admin (jobs, assignment, workload, flags), manager (all incl. KPIs, revenue). Tools outside the role are hidden and rejected server-side. | |
-| FR-AI-4 | M | Guardrail pipeline (fail closed at each stage): input screen → intent judge (strict JSON) → main model (≤ 3 tool calls) → structured-only tool results → output screen → blocked log. | All attack cases in the test plan blocked. |
+| FR-AI-4 | M | Guardrail pipeline (fail closed at each stage): input screen → intent judge (strict JSON) → main model (≤ 3 tool calls) → structured-only tool results → output screen → blocked log. | All attack cases in [ai-attack-cases.md](../5-testing/ai-attack-cases.md) blocked. |
 | FR-AI-5 | M | Each answer shows "based on: tool, period". | |
 | FR-AI-6 | M | Rate limit 20 questions / user / hour; ≤ 3 turns of history. | |
 | FR-AI-7 | M | Supported questions include: jobs by technician and period; top technician; jobs completed today; flags; workload / "who might be overloaded" (SQL computes, AI explains). | |

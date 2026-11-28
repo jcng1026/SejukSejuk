@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/features/auth/actions";
+import { AiLauncher } from "@/features/ai/AiLauncher";
 import { TechTabs } from "@/features/jobs/TechTabs";
 import { SoundToggle } from "@/features/notifications/SoundToggle";
 import { requireUser } from "@/lib/auth";
@@ -43,6 +44,9 @@ export default function TechLayout({ children }: LayoutProps<"/">) {
       {/* usePathname reads the URL, which Cache Components requires inside Suspense. */}
       <Suspense fallback={<div className="h-16 border-t bg-card" />}>
         <TechTabs />
+      </Suspense>
+      <Suspense fallback={null}>
+        <AiLauncher isAboveTabs />
       </Suspense>
     </div>
   );

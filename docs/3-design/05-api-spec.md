@@ -74,7 +74,7 @@ Argument names are `p_`-prefixed in SQL (`id` → `p_order_id`, `reason` → `p_
 | `mark_notifications_read` | any | — | Marks all of the caller's unread rows (the bell opens the whole list) |
 | ~~`technician_day_load`~~ | — | — | Not an RPC: a plain read under RLS (`technicianDayLoad` in `src/features/orders/queries.ts`); counts and clashes are computed client-side by `findClashes` |
 
-**Read RPCs used by AI tools** (also used by dashboard): `ai_jobs_list`, `ai_job_detail`, `ai_job_counts`, `ai_technician_leaderboard`, `ai_technician_workload`, `ai_flags_summary`, `ai_revenue_summary`. Each enforces role inside the function in addition to RLS and returns only the columns listed in §4.
+**Read RPCs used by AI tools**: `ai_jobs_list`, `ai_job_detail`, `ai_job_counts`, `ai_technician_workload`, `ai_flags_summary`, `ai_revenue_summary` (migration `20261129000100`), plus the dashboard's `kpi_leaderboard` for the leaderboard tool. All are SECURITY INVOKER (RLS applies), check the role inside, force technicians to their own jobs and return only the columns listed in §4. Guardrail RPCs: `ai_take_quota(question)` → `{request_id, allowed, message}` (20 per user per rolling hour; a refusal says when it resets and is logged once an hour), `ai_log_blocked(request_id, stage, reason, input)` (only for the caller's own open request, once; input capped at 500 chars) and `ai_mark_answered(request_id, tools)`.
 
 ## 3. Server Actions (Next.js)
 One per write RPC, colocated with its feature (`src/features/<feature>/actions.ts`). Each:
@@ -149,7 +149,7 @@ How to read it: **Front-end call** is what the screen invokes. A *Server Compone
 | Technicians page | Server Component | `profiles` where `role = technician` + open job counts | Manager acts; Admin views |
 | Deactivate / reactivate | `setTechnicianActive` action | `set_technician_active` | Manager |
 | Audit log page | Server Component | `audit_log` filtered by record type, change, actor, channel (app/AI/system), order number and MYT date range; 50 per page, newest first | Admin, Manager |
-| Blocked AI requests page | Server Component | `ai_blocked_log`, paged | Manager |
+| Blocked AI requests page (`/ai-log`) | Server Component | `ai_blocked_log`, newest 100 | Manager |
 
 ### Shared (every screen)
 | Screen / control | Front-end call | Backend | Role |
@@ -181,26 +181,26 @@ New read functions introduced by this map: `kpi_summary`, `kpi_leaderboard`, `kp
 ```
 `proposal` is non-null only for the stretch bulk-review tool: `{ "type": "bulk_review", "order_ids": [...], "count": 7 }`.
 
-**Errors**: `RATE_LIMITED` (429), `AI_BLOCKED` (200 with `ok:false`, generic message, stage logged), `AI_UNAVAILABLE` (503), `UNAUTHENTICATED` (401).
+**Errors**: `RATE_LIMITED` (429, message says when you can ask again), `AI_BLOCKED` (200 with `ok:false`, generic message, stage logged), `AI_UNAVAILABLE` (503), `UNAUTHENTICATED` (401, returned by the proxy for any signed-out `/api/*` call), `FORBIDDEN` (403, cross-site request), `VALIDATION` (400, non-JSON or malformed body), `INTERNAL` (500).
 
 **Tool schemas** (sent to the model; Zod mirrors them server-side)
 
 ```ts
 const DateRange = z.union([
-  z.enum(['today','yesterday','this_week','last_week','this_month','last_month']),
+  z.enum(['today','yesterday','this_week','last_week','next_week','this_month','last_month']),
   z.object({ from: z.string().date(), to: z.string().date() })   // ≤ 92 days
 ]);
 
 jobs_list:              { technician?: string; status?: Status; date_range: DateRange; limit?: number /* ≤ 20 */ }
 job_detail:             { order_no: string /* ^ORD-\d{6}-\d{4}$ */ }
-job_counts:             { status?: Status; date_range: DateRange; group_by?: 'technician'|'service_type'|'day' }
+job_counts:             { status?: Status | 'completed'; date_range: DateRange; group_by?: 'technician'|'service_type'|'day' }  // 'completed' counts finished jobs by completion date
 technician_leaderboard: { date_range: DateRange; metric: 'jobs_completed'|'revenue'|'flags'|'reschedules' }
 technician_workload:    { week: 'this_week'|'last_week'|'next_week' }
 flags_summary:          { severity?: 'high'|'medium'|'low'; status?: 'open'|'resolved'; date_range: DateRange }
 revenue_summary:        { date_range: DateRange; group_by?: 'technician'|'service_type'|'day' }
 ```
 
-**Tool result columns (whitelist)**: `order_no, status, service_type, technician_name, scheduled_at, completed_at, quoted_rm, final_rm, flag_severity, flag_rule_code`, plus aggregates.
+**Tool result columns (whitelist)**: `order_no, status, service_type, technician_name, scheduled_at, completed_at, quoted_rm, final_rm, flag_severity, flag_rule_code` (flags summary adds the flag's `status` and `raised_at`; the leaderboard adds average start→done minutes), plus aggregates.
 **Customer contact** `customer_name, customer_phone, customer_address` is added per row only when the caller is Admin, Manager, or the technician currently assigned to that order (checked inside the RPC, backed by RLS). Address is capped at 200 chars and wrapped as untrusted data.
 **Never returned**: problem description, remarks, admin notes, work done, flag/resolution notes.
 
