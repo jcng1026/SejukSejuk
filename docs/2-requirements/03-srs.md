@@ -84,11 +84,11 @@ Status: Draft for approval · Priority: **M** Must, **S** Should, **C** Could (s
 ### 2.7 Dashboard and calendar
 | ID | P | Requirement | Acceptance criteria |
 |---|---|---|---|
-| FR-KPI-1 | M | Cards: jobs completed, revenue (Σ final), payments collected, open flags. | Numbers match SQL fixtures. |
+| FR-KPI-1 | M | Cards: jobs completed, revenue (Σ final), payments collected, open flags (current count, not per period). | Numbers match SQL fixtures. |
 | FR-KPI-2 | M | Leaderboard per technician: jobs completed, revenue, reschedules, flags, avg start→done time. | |
 | FR-KPI-3 | S | Charts: jobs per day, service-type mix. | |
 | FR-KPI-4 | M | Period: This week / Last week / This month / custom; weeks Mon–Sun MYT. | |
-| FR-CAL-1 | S | Week and month calendar of scheduled jobs, technician filter, status colours, click opens order (Admin/Manager). | |
+| FR-CAL-1 | S | Week and month calendar (plus a day view for phones) of scheduled jobs, technician filter, status colours, click opens order (Admin/Manager). | |
 | FR-HOME-1 | M | Admin/Manager home = schedule bento (mockup C2): KPI tiles, flags by severity, technician-by-hour schedule, review queue. | |
 
 ### 2.8 Audit and administration

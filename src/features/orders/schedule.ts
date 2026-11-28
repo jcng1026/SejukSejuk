@@ -1,6 +1,7 @@
 // All scheduling is in Malaysia time (UTC+8, no daylight saving).
 
 const MYT_OFFSET_MINUTES = 8 * 60;
+export const DAY_MS = 86_400_000;
 const CLASH_WINDOW_MINUTES = 120;
 
 /** Half-hour slots offered in the order form, 08:00–18:00. */
@@ -79,4 +80,23 @@ export function findClashes<T extends ScheduledJob>(jobs: readonly T[], candidat
   return jobs.filter(
     (job) => Math.abs(Date.parse(job.scheduledAt) - candidate) < CLASH_WINDOW_MINUTES * 60_000,
   );
+}
+
+const CLASH_TIME = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Asia/Kuala_Lumpur",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+/** A busy technician can clash with dozens of jobs; name a few so the warning stays readable. */
+const CLASHES_NAMED = 3;
+
+/** "ORD-… at 10:00, ORD-… at 10:30 and 4 more" for the assignment warning. */
+export function describeClashes(clashes: readonly ScheduledJob[]): string {
+  const named = clashes
+    .slice(0, CLASHES_NAMED)
+    .map((job) => `${job.orderNo} at ${CLASH_TIME.format(new Date(job.scheduledAt))}`)
+    .join(", ");
+  const more = clashes.length - CLASHES_NAMED;
+  return more > 0 ? `${named} and ${more} more` : named;
 }

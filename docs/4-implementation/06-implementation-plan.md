@@ -46,7 +46,7 @@ Estimates are focused working hours (≈ 40 h of the 64 h window; the rest is bu
 ## Phase 4 — Home, KPIs, calendar, team (≈ 6 h) · branch `feat/insights`
 | # | Task | Est |
 |---|---|---|
-| 4.1 | 🧪 KPI SQL functions (MYT week bucketing, property tests on date ranges) | 1.5 h |
+| 4.1 | 🧪 KPI SQL functions (MYT week bucketing, property tests on date ranges — on the TypeScript period maths; the SQL side is checked by delta tests on today's range) | 1.5 h |
 | 4.2 | C2 schedule-bento home (KPI tiles, flags bar, technician × hour schedule, review queue) | 2 h |
 | 4.3 | Dashboard page: cards, leaderboard, Recharts charts, period switcher | 1.5 h |
 | 4.4 | Calendar (FullCalendar week/month, technician filter) | 0.5 h |

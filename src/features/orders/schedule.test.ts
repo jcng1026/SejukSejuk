@@ -2,6 +2,7 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 
 import {
+  describeClashes,
   findClashes,
   formatMytWhen,
   mytDateTimeToIso,
@@ -93,6 +94,25 @@ describe("findClashes", () => {
         const ba = findClashes([{ orderNo: "A", scheduledAt: isoA }], isoB).length;
         return ab === ba;
       }),
+    );
+  });
+});
+
+describe("describeClashes", () => {
+  const job = (n: number) => ({
+    orderNo: `ORD-261128-000${n}`,
+    scheduledAt: mytDateTimeToIso("2026-11-28", "10:00") as string,
+  });
+
+  it("names every clash when there are only a few", () => {
+    expect(describeClashes([job(1), job(2)])).toBe(
+      "ORD-261128-0001 at 10:00, ORD-261128-0002 at 10:00",
+    );
+  });
+
+  it("names the first three and counts the rest, so the warning stays short", () => {
+    expect(describeClashes([1, 2, 3, 4, 5].map(job))).toBe(
+      "ORD-261128-0001 at 10:00, ORD-261128-0002 at 10:00, ORD-261128-0003 at 10:00 and 2 more",
     );
   });
 });
