@@ -2,14 +2,7 @@
 
 import { errorProps, FormField, SELECT_CLASS } from "./FormField";
 import type { Technician, TechnicianJobSlot } from "./queries";
-import { findClashes } from "./schedule";
-
-const CLASH_TIME = new Intl.DateTimeFormat("en-GB", {
-  timeZone: "Asia/Kuala_Lumpur",
-  hour: "2-digit",
-  minute: "2-digit",
-  hourCycle: "h23",
-});
+import { describeClashes, findClashes } from "./schedule";
 
 interface TechnicianPickerProps {
   id: string;
@@ -42,9 +35,7 @@ export function TechnicianPicker({
   const jobsFor = (technicianId: string) =>
     load.filter((slot) => slot.technicianId === technicianId);
   const clashes = value && candidateIso ? findClashes(jobsFor(value), candidateIso) : [];
-  const clashText = clashes
-    .map((c) => `${c.orderNo} at ${CLASH_TIME.format(new Date(c.scheduledAt))}`)
-    .join(", ");
+  const clashText = describeClashes(clashes);
   let status = "Job counts are for the job's date.";
   if (isLoading) status = "Checking schedules…";
   else if (clashes.length > 0) status = `Clash: ${clashText} — you can still assign.`;
